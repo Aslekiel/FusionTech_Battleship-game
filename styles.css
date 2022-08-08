@@ -81,15 +81,27 @@
   border: 2px solid black;
 }
 
-.battle-caser {
+.battle-caser-ver {
   width: 40px;
   height: 120px;
   border: 2px solid black;
 }
 
-.battle-destroyer {
+.battle-caser-hor {
+  width: 120px;
+  height: 40px;
+  border: 2px solid black;
+}
+
+.battle-destroyer-ver {
   width: 40px;
   height: 80px;
+  border: 2px solid black;
+}
+
+.battle-destroyer-hor {
+  width: 80px;
+  height: 40px;
   border: 2px solid black;
 }
 

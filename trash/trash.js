@@ -55,3 +55,15 @@
 //   .hovered {
 //     border: 1px solid red;
 //   }
+
+/////////////////
+// for (let i = 0; i < board.length; i++) {
+//     if (i == Array.from(cells).indexOf(cell)) {
+//       board[i] = 1;
+//     }
+//     ship.addEventListener("mousedown", function () {
+//       if (i == Array.from(cells).indexOf(cell)) {
+//         board[i] = 0;
+//       }
+//     });
+//   }
