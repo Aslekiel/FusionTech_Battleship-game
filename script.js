@@ -28,6 +28,7 @@ const battleWagon = document.querySelector(".battle-wagon-ver");
 battleWagon.onmousedown = function (event) {
   battleWagon.style.position = "absolute";
   battleWagon.style.zIndex = 1000;
+
   document.body.append(battleWagon);
 
   moveAt(event.pageX, event.pageY);
@@ -61,6 +62,7 @@ battleWagon.onmousedown = function (event) {
       currentDroppable = droppableBelow;
       if (currentDroppable) {
         battleWagon.classList.add(".active");
+
         getCurrentXY(currentDroppable);
       }
     }
@@ -86,7 +88,20 @@ battleWagon.onmousedown = function (event) {
         battleWagon.style.top = elem.offsetTop + "px";
       }
 
-      getBoardFilling(battleWagon);
+      let initCellX = Math.floor(
+        (event.target.getBoundingClientRect().x -
+          playerBoard.getBoundingClientRect().x -
+          2) /
+          40
+      );
+      let initCellY = Math.floor(
+        (event.target.getBoundingClientRect().y -
+          playerBoard.getBoundingClientRect().y -
+          2) /
+          40
+      );
+
+      getBoardFilling(battleWagon, initCellX, initCellY);
     };
   }
   battleWagon.ondragstart = function () {
@@ -121,6 +136,7 @@ battleCasers.forEach((battleCaser) => {
   battleCaser.onmousedown = function (event) {
     battleCaser.style.position = "absolute";
     battleCaser.style.zIndex = 1000;
+
     document.body.append(battleCaser);
 
     moveAt(event.pageX, event.pageY);
@@ -315,7 +331,7 @@ battleDestroyers.forEach((battleDestroyer) => {
 });
 
 // Конец: логика расположения для двухпалубного корабля
-// console.log(board);
+
 // Начало: логика расположения для однопалубного корабля
 
 const battleBoats = document.querySelectorAll(".battle-boat");
@@ -407,7 +423,7 @@ battleBoats.forEach((battleBoat) => {
 
 // ////////////////////////////////////////////////////////////
 
-function getBoardFilling(ship) {
+function getBoardFilling(ship, initCellX, initCellY) {
   cells.forEach((cell) => {
     let currentCellX = cell.getBoundingClientRect().x;
     let currentCellY = cell.getBoundingClientRect().y;
@@ -454,11 +470,13 @@ function getBoardFilling(ship) {
               board[i][j] = 1;
             }
           }
+
           ship.addEventListener("mousedown", function () {
             if (
               i == (cell.getBoundingClientRect().y - coordinateY) / 40 &&
               j == (cell.getBoundingClientRect().x - coordinateX) / 40
             ) {
+              cell.classList.remove("block-field");
               if (ship.offsetWidth / 40 == 2) {
                 board[i][j] = 0;
                 board[i][j + 1] = 0;
@@ -491,6 +509,54 @@ function getBoardFilling(ship) {
         }
       }
     }
+    function getEmptyField(arr) {
+      for (let i = 0; i < arr.length; i++) {
+        for (let j = 0; j < arr.length; j++) {
+          if (initCellX == j && initCellY == i && ship.offsetWidth / 40 == 4) {
+            console.log(
+              (cell.getBoundingClientRect().x -
+                playerBoard.getBoundingClientRect().x -
+                2) /
+                40
+            );
+            // console.log(j, i);
+          }
+        }
+      }
+      // console.log(initCellX, initCellY);
+      // ship.childNodes.length
+    }
+    getEmptyField(board);
   });
+  // console.log(board);
   return board;
 }
+
+// Начало игры
+
+const button = document.querySelector(".start-button");
+
+button.addEventListener("click", function () {
+  playerBoard.style.zIndex = -10;
+});
+
+////////////////////////////////////////////
+
+document.querySelectorAll(".board-cell").forEach((cell) =>
+  cell.addEventListener("click", function (event) {
+    console.log(event.target);
+
+    console.log(
+      (event.target.getBoundingClientRect().x -
+        playerBoard.getBoundingClientRect().x -
+        2) /
+        40,
+      (event.target.getBoundingClientRect().y -
+        playerBoard.getBoundingClientRect().y -
+        2) /
+        40
+    );
+  })
+);
+
+console.log(board);

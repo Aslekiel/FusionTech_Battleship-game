@@ -67,3 +67,85 @@
 //       }
 //     });
 //   }
+
+// if (
+//     currentCellX == currentPlayerBoardX &&
+//     currentCellY == currentPlayerBoardY
+//   ) {
+//     if (ship.offsetWidth / 40 == 2) {
+//       // Бока
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 1
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 2
+//       ].classList.add("block-field");
+
+//       // Верх
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 8
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 9
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 10
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 11
+//       ].classList.add("block-field");
+
+//       // Низ
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 9
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 10
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 11
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 12
+//       ].classList.add("block-field");
+//     } else if (ship.offsetHeight / 40 == 2) {
+//       // Бока
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 1
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 1
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 9
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 10
+//       ].classList.add("block-field-white");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 11
+//       ].classList.add("block-field");
+
+//       // Верх
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 9
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 10
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) - 11
+//       ].classList.add("block-field");
+
+//       // Низ
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 19
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 20
+//       ].classList.add("block-field");
+//       playerBoard.childNodes[
+//         Array.from(cells).indexOf(cell) + 21
+//       ].classList.add("block-field");
+//     }
+//   }

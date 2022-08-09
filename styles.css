@@ -130,3 +130,22 @@
   border: 1px solid black;
   height: 100%;
 }
+
+.block-field {
+  background-color: rgb(196, 192, 192);
+  z-index: -10;
+}
+
+.block-field-white {
+  z-index: -10;
+}
+
+.start-button {
+  margin-top: 400px;
+  margin-left: 90px;
+  padding: 20px;
+  width: 200px;
+}
+
+.block-cell {
+}
