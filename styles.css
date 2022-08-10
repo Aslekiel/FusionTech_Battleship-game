@@ -46,13 +46,20 @@
 }
 
 .board-player {
-  display: grid;
-  grid-template-columns: repeat(10, 40px);
-  grid-template-rows: repeat(10, 40px);
+  display: flex;
+  flex-direction: column;
   width: 401px;
   height: 401px;
   border: 2px solid blue;
   margin: 20px;
+}
+
+.board-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 400px;
+  height: 40px;
 }
 
 .board-enemy {
@@ -66,6 +73,8 @@
 }
 
 .board-cell {
+  width: 40px;
+  height: 40px;
   border: 1px solid grey;
 }
 
@@ -111,7 +120,7 @@
   border: 2px solid black;
 }
 
-.battle-wagon__deck {
+/* .battle-wagon__deck {
   border: 1px solid black;
   height: 25%;
 }
@@ -129,14 +138,10 @@
 .battle-boat__deck {
   border: 1px solid black;
   height: 100%;
-}
+} */
 
 .block-field {
   background-color: rgb(196, 192, 192);
-  z-index: -10;
-}
-
-.block-field-white {
   z-index: -10;
 }
 
@@ -145,7 +150,4 @@
   margin-left: 90px;
   padding: 20px;
   width: 200px;
-}
-
-.block-cell {
 }

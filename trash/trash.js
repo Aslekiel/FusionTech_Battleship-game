@@ -149,3 +149,88 @@
 //       ].classList.add("block-field");
 //     }
 //   }
+
+// if (
+//   cell.dataset.x ==
+//     Number(elem.dataset.x) + ship.childElementCount - 1 &&
+//   cell.dataset.y == elem.dataset.y &&
+//   cell.classList.contains("block-field")
+// ) {
+//   alert("Увы, здесь корабль не поставить!");
+//   document.querySelector(".ship-selection__up").append(ship);
+// }
+
+////////////////////////////// test
+// getEmptyField(battleWagon, elemBelow, droppableBelow);
+// function getEmptyField(ship, elem, cell) {
+//   let currentPlayerBoardX = ship.getBoundingClientRect().x;
+//   let currentPlayerBoardY = ship.getBoundingClientRect().y;
+
+//   let initCellX = Math.floor(
+//     (currentPlayerBoardX - playerBoard.getBoundingClientRect().x - 2) / 40
+//   );
+//   let initCellY = Math.floor(
+//     (currentPlayerBoardY - playerBoard.getBoundingClientRect().y - 2) / 40
+//   );
+
+//   console.log(initCellX);
+//   console.log(elem.dataset.x);
+//   console.log(initCellY == elem.dataset.y);
+//   console.log(ship.offsetWidth / 40 == ship.childElementCount);
+//   if (
+//     initCellX == elem.dataset.x &&
+//     initCellY == elem.dataset.y &&
+//     ship.offsetWidth / 40 == ship.childElementCount
+//   ) {
+//     if (
+//       cell.dataset.x == Number(elem.dataset.x) + ship.childElementCount - 1 &&
+//       cell.dataset.y == elem.dataset.y &&
+//       cell.classList.contains("block-field")
+//     ) {
+//       alert("Увы, здесь корабль не поставить!");
+//       console.log(elem);
+
+//       // document.querySelector(".ship-selection__up").append(ship);
+//     }
+
+//     for (let y = initCellY - 1; y < initCellY + 2; y++) {
+//       for (
+//         let x = initCellX - 1;
+//         x < initCellX + ship.childElementCount + 1;
+//         x++
+//       ) {
+//         if (cell.dataset.x == x && cell.dataset.y == y) {
+//           cell.classList.add("block-field");
+//         }
+//       }
+//     }
+//   }
+
+//   if (
+//     initCellX == elem.dataset.x &&
+//     initCellY == elem.dataset.y &&
+//     ship.offsetHeight / 40 == ship.childElementCount
+//   ) {
+//     if (
+//       cell.dataset.x == elem.dataset.x &&
+//       cell.dataset.y == Number(elem.dataset.y) + ship.childElementCount - 1 &&
+//       cell.classList.contains("block-field")
+//     ) {
+//       alert("Увы, здесь корабль не поставить!");
+//     }
+
+//     for (
+//       let y = initCellY - 1;
+//       y < initCellY + ship.childElementCount + 1;
+//       y++
+//     ) {
+//       for (let x = initCellX - 1; x < initCellX + 2; x++) {
+//         if (cell.dataset.x == x && cell.dataset.y == y) {
+//           cell.classList.add("block-field");
+//         }
+//       }
+//     }
+//   }
+// }
+
+// ///////////////////////////////// test
