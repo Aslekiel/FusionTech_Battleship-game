@@ -7,17 +7,21 @@
 }
 
 .battleship-field {
-  display: grid;
-  grid-template-columns: 400px 1fr;
-  grid-template-rows: 1fr;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
   border: 4px solid burlywood;
 }
 
 .ship-selection {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding-top: 100px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 30%;
 }
 
 .ship-selection__up {
@@ -25,7 +29,13 @@
   flex-direction: row;
   justify-content: space-evenly;
   align-items: center;
-  height: 160px;
+  position: absolute;
+  top: 200px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 100%;
+  height: 200px;
 }
 
 .ship-selection__down {
@@ -33,7 +43,13 @@
   flex-direction: row;
   justify-content: space-evenly;
   align-items: center;
-  padding-top: 20px;
+  position: absolute;
+  top: 400px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 100%;
+  height: 100px;
 }
 
 .board-wrapper {
@@ -41,6 +57,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 70%;
 
   border-left: 4px solid burlywood;
 }
@@ -81,6 +98,10 @@
   width: 40px;
   height: 40px;
   border: 1px solid grey;
+}
+
+.ship {
+  background-color: rgb(65, 186, 168);
 }
 
 .battle-wagon-ver {
@@ -150,9 +171,29 @@
   z-index: -10;
 }
 
+.random-position-button {
+  position: absolute;
+  top: 640px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 15px;
+  white-space: nowrap;
+}
+
+.independent-position-button {
+  position: absolute;
+  top: 720px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 27px;
+  white-space: nowrap;
+}
+
 .start-button {
-  margin-top: 400px;
-  margin-left: 90px;
-  padding: 20px;
-  width: 200px;
+  position: absolute;
+  top: 800px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 50px;
+  white-space: nowrap;
 }

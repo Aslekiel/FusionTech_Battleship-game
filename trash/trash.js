@@ -234,3 +234,6 @@
 // }
 
 // ///////////////////////////////// test
+
+// enemyBoardMatrix[i][x] == 1 &&
+// enemyBoardMatrix[y][j] == 1

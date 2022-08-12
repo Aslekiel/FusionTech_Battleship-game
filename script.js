@@ -1,6 +1,67 @@
-// Начало: построение сетки 10х10 для поля игрока и противника
+const shipSelectionUp = document.querySelector(".ship-selection__up");
+const shipSelectionDown = document.querySelector(".ship-selection__down");
+const ships = document.querySelectorAll(".ship");
+
 const playerBoard = document.querySelector(".board-player");
 const enemyBoard = document.querySelector(".board-enemy");
+
+const randomButton = document.querySelector(".random-position-button");
+const independentButton = document.querySelector(
+  ".independent-position-button"
+);
+const startButton = document.querySelector(".start-button");
+
+const boardFriendly = [];
+
+for (let i = 0; i < 10; i++) {
+  boardFriendly.push([i]);
+  for (let j = 0; j < boardFriendly[i].length; j++) {
+    boardFriendly[i].length = 10;
+    boardFriendly[i].fill(0);
+  }
+}
+
+const enemyBoardMatrix = [];
+
+for (let i = 0; i < 10; i++) {
+  enemyBoardMatrix.push([i]);
+  for (let j = 0; j < enemyBoardMatrix[i].length; j++) {
+    enemyBoardMatrix[i].length = 10;
+    enemyBoardMatrix[i].fill(0);
+  }
+}
+
+const battlefildPlayer = [];
+const battlefildEnemy = [];
+
+for (let i = 0; i < 10; i++) {
+  battlefildPlayer[i] = {
+    0: "a",
+    1: "b",
+    2: "c",
+    3: "d",
+    4: "e",
+    5: "f",
+    6: "g",
+    7: "h",
+    8: "i",
+    9: "j",
+  };
+  battlefildEnemy[i] = {
+    0: "a",
+    1: "b",
+    2: "c",
+    3: "d",
+    4: "e",
+    5: "f",
+    6: "g",
+    7: "h",
+    8: "i",
+    9: "j",
+  };
+}
+
+// Начало: построение сетки 10х10 для поля игрока и противника
 
 for (let y = 0; y < 10; y++) {
   const boardRow = document.createElement("div");
@@ -35,26 +96,6 @@ for (let y = 0; y < 10; y++) {
 const cells = document.querySelectorAll(".board-cell");
 
 const cellsEnemy = document.querySelectorAll(".board-cell__enemy");
-
-let board = [];
-
-for (let i = 0; i < 10; i++) {
-  board.push([i]);
-  for (let j = 0; j < board[i].length; j++) {
-    board[i].length = 10;
-    board[i].fill(0);
-  }
-}
-
-const enemyBoardMatrix = [];
-
-for (let i = 0; i < 10; i++) {
-  enemyBoardMatrix.push([i]);
-  for (let j = 0; j < enemyBoardMatrix[i].length; j++) {
-    enemyBoardMatrix[i].length = 10;
-    enemyBoardMatrix[i].fill(0);
-  }
-}
 
 // Начало: логика расположения для четырехпалубного корабля
 
@@ -110,7 +151,6 @@ battleWagon.onmousedown = function (event) {
   battleWagon.onmouseup = function () {
     document.removeEventListener("mousemove", onMouseMove);
     battleWagon.onmouseup = null;
-    alert("Увы, здесь корабль не поставить!");
   };
 
   battleWagon.ondragstart = function () {
@@ -191,7 +231,6 @@ battleCasers.forEach((battleCaser) => {
     battleCaser.onmouseup = function () {
       document.removeEventListener("mousemove", onMouseMove);
       battleCaser.onmouseup = null;
-      alert("Увы, здесь корабль не поставить!");
     };
 
     battleCaser.ondragstart = function () {
@@ -276,7 +315,6 @@ battleDestroyers.forEach((battleDestroyer) => {
     battleDestroyer.onmouseup = function () {
       document.removeEventListener("mousemove", onMouseMove);
       battleDestroyer.onmouseup = null;
-      alert("Увы, здесь корабль не поставить!");
     };
 
     battleDestroyer.ondragstart = function () {
@@ -312,12 +350,6 @@ battleBoats.forEach((battleBoat) => {
     battleBoat.style.position = "absolute";
     battleBoat.style.zIndex = 1000;
     document.body.append(battleBoat);
-
-    // Здесь вызывать функцию на remove block-field
-
-    // cells.forEach((cell) => {
-    //   someFunc(cell, elem);
-    // });
 
     moveAt(event.pageX, event.pageY);
 
@@ -356,7 +388,6 @@ battleBoats.forEach((battleBoat) => {
     battleBoat.onmouseup = function () {
       document.removeEventListener("mousemove", onMouseMove);
       battleBoat.onmouseup = null;
-      alert("Увы, здесь корабль не поставить!");
     };
 
     battleBoat.ondragstart = function () {
@@ -367,315 +398,411 @@ battleBoats.forEach((battleBoat) => {
 
 // Конец: логика расположения для однопалубного корабля
 
-// Начало: Получение местоположения корабля на доске
+// Начало: Расположение корабля на доске
 
-function getCurrentXY(elem, ship, onMouseMove) {
+function getCurrentXY(currentDroppable, ship, onMouseMove) {
   ship.onmouseup = function () {
     document.removeEventListener("mousemove", onMouseMove);
     ship.classList.remove("active");
     playerBoard.style.position = "relative";
     playerBoard.append(ship);
 
-    // Начало: Корабль не уходит за пределы поля
-    if (
-      ship.offsetWidth / 40 == ship.childElementCount &&
-      elem.offsetLeft > 360 - 40 * (ship.childElementCount - 1)
-    ) {
-      alert("Увы, здесь корабль не поставить!");
-      document.querySelector(".ship-selection__up").append(ship);
-    } else if (
-      ship.offsetHeight / 40 == ship.childElementCount &&
-      elem.offsetTop > 360 - 40 * (ship.childElementCount - 1)
-    ) {
-      alert("Увы, здесь корабль не поставить!");
-      document.querySelector(".ship-selection__up").append(ship);
-    } else {
-      ship.style.left = elem.offsetLeft + "px";
-      ship.style.top = elem.offsetTop + "px";
-    }
-
-    let currentPlayerBoardX = ship.getBoundingClientRect().x;
-    let currentPlayerBoardY = ship.getBoundingClientRect().y;
-
-    let initCellX = Math.floor(
-      (currentPlayerBoardX - playerBoard.getBoundingClientRect().x - 2) / 40
-    );
-    let initCellY = Math.floor(
-      (currentPlayerBoardY - playerBoard.getBoundingClientRect().y - 2) / 40
-    );
-
-    cells.forEach((cell) => {
-      let currentCellX = cell.getBoundingClientRect().x;
-      let currentCellY = cell.getBoundingClientRect().y;
-
-      let coordinateX = cells[0].getBoundingClientRect().x;
-      let coordinateY = cells[0].getBoundingClientRect().y;
-
-      if (
-        initCellX == elem.dataset.x &&
-        initCellY == elem.dataset.y &&
-        ship.offsetWidth / 40 == ship.childElementCount
-      ) {
-        for (let y = initCellY - 1; y < initCellY + 2; y++) {
-          for (
-            let x = initCellX - 1;
-            x < initCellX + ship.childElementCount + 1;
-            x++
-          ) {
-            if (cell.dataset.x == x && cell.dataset.y == y) {
-              if (!cell.dataset.flag) {
-                cell.dataset.flag = true;
-                // console.log(cell);
-                // console.log(cell.dataset.x, cell.dataset.y);
-                // console.log(cell.dataset.flag);
-              } else {
-                // cell.style.backgroundColor = "pink";
-                cell.dataset.flag = false;
-              }
-
-              // console.log(cell.dataset.x, cell.dataset.y);
-              // console.log(cell.dataset.flag);
-              ship.addEventListener("mousedown", function () {
-                if (
-                  initCellX == elem.dataset.x &&
-                  initCellY == elem.dataset.y &&
-                  ship.offsetWidth / 40 == ship.childElementCount
-                ) {
-                  for (let y = initCellY - 1; y < initCellY + 2; y++) {
-                    for (
-                      let x = initCellX - 1;
-                      x < initCellX + ship.childElementCount + 1;
-                      x++
-                    ) {
-                      if (cell.dataset.x == x && cell.dataset.y == y) {
-                        // cell.style.backgroundColor = "green";
-                        cell.dataset.flag = true;
-                      }
-                    }
-                  }
-                }
-              });
-            }
-          }
-        }
-      } else {
-        for (
-          let y = initCellY - 1;
-          y < initCellY + ship.childElementCount + 1;
-          y++
-        ) {
-          for (let x = initCellX - 1; x < initCellX + 2; x++) {
-            if (cell.dataset.x == x && cell.dataset.y == y) {
-              // cell.style.backgroundColor = "pink";
-
-              cell.dataset.flag = false;
-            }
-          }
-        }
-        ship.addEventListener("mousedown", function () {
-          if (
-            initCellX == elem.dataset.x &&
-            initCellY == elem.dataset.y &&
-            ship.offsetWidth / 40 == ship.childElementCount
-          ) {
-            for (let y = initCellY - 1; y < initCellY + 2; y++) {
-              for (
-                let x = initCellX - 1;
-                x < initCellX + ship.childElementCount + 1;
-                x++
-              ) {
-                if (cell.dataset.x == x && cell.dataset.y == y) {
-                  // cell.style.backgroundColor = "green";
-                  cell.dataset.flag = true;
-                }
-              }
-            }
-          }
-        });
-        // else {
-        //   for (
-        //     let y = initCellY - 1;
-        //     y < initCellY + ship.childElementCount + 1;
-        //     y++
-        //   ) {
-        //     for (let x = initCellX - 1; x < initCellX + 2; x++) {
-        //       if (cell.dataset.x == x && cell.dataset.y == y) {
-        //         cell.style.backgroundColor = "green";
-        //         cell.dataset.flag = true;
-        //       }
-        //     }
-        //   }
-        // }
-
-        getBoardFilling(
-          ship,
-          currentPlayerBoardX,
-          currentPlayerBoardY,
-          currentCellX,
-          currentCellY,
-          coordinateX,
-          coordinateY
-        );
-      }
-    });
+    getPlacement(currentDroppable, ship, battlefildPlayer, boardFriendly);
   };
 }
 
-// Конец: Корабль не уходит за пределы поля
+// Конец: Расположение корабля на доске
 
-// ////////////////////////////////////////////////////////////
+// Начало: Заполнение матрицы координатами
 
-function getBoardFilling(
-  ship,
-  currentPlayerBoardX,
-  currentPlayerBoardY,
-  currentCellX,
-  currentCellY,
-  coordinateX,
-  coordinateY
-) {
+function getPlacement(currentDroppable, ship, battlefield, board) {
+  [cx, cy] = [currentDroppable.dataset.x, currentDroppable.dataset.y];
+
+  if (ship.offsetWidth / 40 == ship.childElementCount) {
+    [lastShipDeckCx, lastShipDeckCy] = [
+      parseInt(cx) + ship.childElementCount - 1,
+      parseInt(cy),
+    ];
+  } else if (ship.offsetHeight / 40 == ship.childElementCount) {
+    [lastShipDeckCx, lastShipDeckCy] = [
+      parseInt(cx),
+      parseInt(cy) + ship.childElementCount - 1,
+    ];
+  }
+
+  for (let item in battlefield) {
+    for (let key in battlefield[item]) {
+      if (
+        (cx == key && cy == battlefield[item][key]) ||
+        (lastShipDeckCx == key && lastShipDeckCy == battlefield[item][key])
+      ) {
+        document.querySelector(".ship-selection").append(ship);
+        return;
+      } else {
+        ship.style.left = currentDroppable.offsetLeft + "px";
+        ship.style.top = currentDroppable.offsetTop + "px";
+      }
+    }
+  }
+
   if (
-    currentCellX == currentPlayerBoardX &&
-    currentCellY == currentPlayerBoardY
+    (boardFriendly.length - cx < ship.childElementCount &&
+      ship.offsetWidth / 40 == ship.childElementCount) ||
+    (boardFriendly.length - cy < ship.childElementCount &&
+      ship.offsetHeight / 40 == ship.childElementCount)
   ) {
-    for (let i = 0; i < board.length; i++) {
-      for (let j = 0; j < board[i].length; j++) {
-        if (
-          i == (currentCellY - coordinateY) / 40 &&
-          j == (currentCellX - coordinateX) / 40
-        ) {
-          if (ship.offsetWidth == 40 * ship.childElementCount) {
-            for (let k = 0; k < ship.childElementCount; k++) {
-              board[i][j + k] = 1;
-            }
-          } else {
-            for (let k = 0; k < ship.childElementCount; k++) {
-              board[i + k][j] = 1;
+    document.querySelector(".ship-selection").append(ship);
+    return;
+  }
+
+  if (ship.offsetWidth / 40 == ship.childElementCount) {
+    for (let y = parseInt(cy) - 1; y < parseInt(cy) + 2; y++) {
+      for (
+        let x = parseInt(cx) - 1;
+        x < parseInt(cx) + ship.childElementCount + 1;
+        x++
+      ) {
+        for (let item in battlefield) {
+          if (item == y) {
+            for (let key in battlefield[item]) {
+              if (key == x) {
+                key = x;
+                battlefield[item][key] = y;
+              }
             }
           }
         }
+        for (let k = 0; k < ship.childElementCount; k++) {
+          if (cy == y && cx == x) {
+            board[y][x + k] = 1;
+          }
+        }
+      }
+    }
+  } else {
+    for (
+      let y = parseInt(cy) - 1;
+      y < parseInt(cy) + ship.childElementCount + 1;
+      y++
+    ) {
+      for (let x = parseInt(cx) - 1; x < parseInt(cx) + 2; x++) {
+        for (let item in battlefield) {
+          if (item == y) {
+            for (let key in battlefield[item]) {
+              if (key == x) {
+                key = x;
+                battlefield[item][key] = y;
+              }
+            }
+          }
+        }
+        for (let k = 0; k < ship.childElementCount; k++) {
+          if (cy == y && cx == x) {
+            board[y + k][x] = 1;
+          }
+        }
+      }
+    }
+  }
 
-        ship.addEventListener("mousedown", function () {
-          if (
-            i == (currentCellY - coordinateY) / 40 &&
-            j == (currentCellX - coordinateX) / 40
-          ) {
-            if (ship.offsetWidth == 40 * ship.childElementCount) {
-              for (let k = 0; k < ship.childElementCount; k++) {
-                board[i][j + k] = 0;
-              }
-            } else {
-              for (let k = 0; k < ship.childElementCount; k++) {
-                board[i + k][j] = 0;
-              }
+  return battlefield;
+}
+
+// Конец: Заполнение матрицы координатами
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+// Начало игры
+
+startButton.addEventListener("click", function () {
+  if (
+    (document.querySelector(".ship-selection__up").childElementCount == 0 &&
+      document.querySelector(".ship-selection__down").childElementCount == 0) ||
+    (shipSelectionUp.style.zIndex == -10 &&
+      shipSelectionDown.style.zIndex == -10)
+  ) {
+    playerBoard.style.zIndex = -10;
+    enemyBoard.style.zIndex = 0;
+    alert("Игра началась!");
+
+    // TEST //
+
+    for (let i = 0; i < enemyBoardMatrix.length; i++) {
+      for (let j = 0; j < enemyBoardMatrix.length; j++) {
+        cellsEnemy.forEach((cell) => {
+          if (enemyBoardMatrix[i][j] !== 0) {
+            if (j == cell.dataset.x && i == cell.dataset.y) {
+              cell.style.backgroundColor = "green";
+              cell.style.border = "1px solid black";
             }
           }
         });
       }
     }
-  }
-}
 
-// Начало игры
+    // TEST //
 
-const button = document.querySelector(".start-button");
-
-button.addEventListener("click", function () {
-  if (
-    document.querySelector(".ship-selection__up").childElementCount == 0 &&
-    document.querySelector(".ship-selection__down").childElementCount == 0
-  ) {
-    playerBoard.style.zIndex = -10;
-    alert("Игра началась!");
+    alert("Сделай свой ход!");
   } else {
     alert("Не все корабли выставлены на поле!");
   }
 });
 
-////////////////////////////////////////////
-
-console.log(board);
-
-// Если ячейка, на которую ставится находится рядом с block-field, то поставка смещается на длину корабря -1
-
-// document.addEventListener("click", function (event) {
-//   console.log(event.target);
-// });
-
-// Начало: стрельба ИИ
-
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
-// Конец: стрельба ИИ
+independentButton.addEventListener("click", function () {
+  for (let i = 0; i < 10; i++) {
+    battlefildPlayer[i] = {
+      0: "a",
+      1: "b",
+      2: "c",
+      3: "d",
+      4: "e",
+      5: "f",
+      6: "g",
+      7: "h",
+      8: "i",
+      9: "j",
+    };
+
+    for (let j = 0; j < boardFriendly.length; j++) {
+      cells.forEach((cell) => (cell.style.backgroundColor = ""));
+      boardFriendly[i][j] = 0;
+    }
+    ships.forEach((ship) => (ship.style.display = ""));
+    shipSelectionUp.style.zIndex = 0;
+    shipSelectionDown.style.zIndex = 0;
+  }
+  event.preventDefault();
+});
+
+randomButton.addEventListener("click", function (event) {
+  event.preventDefault();
+
+  for (let i = 0; i < 10; i++) {
+    battlefildPlayer[i] = {
+      0: "a",
+      1: "b",
+      2: "c",
+      3: "d",
+      4: "e",
+      5: "f",
+      6: "g",
+      7: "h",
+      8: "i",
+      9: "j",
+    };
+
+    for (let j = 0; j < boardFriendly.length; j++) {
+      cells.forEach((cell) => (cell.style.backgroundColor = ""));
+      boardFriendly[i][j] = 0;
+    }
+  }
+
+  getRandomPlacement(4, battlefildPlayer, boardFriendly);
+  getRandomPlacement(3, battlefildPlayer, boardFriendly);
+  getRandomPlacement(3, battlefildPlayer, boardFriendly);
+  getRandomPlacement(2, battlefildPlayer, boardFriendly);
+  getRandomPlacement(2, battlefildPlayer, boardFriendly);
+  getRandomPlacement(2, battlefildPlayer, boardFriendly);
+  getRandomPlacement(1, battlefildPlayer, boardFriendly);
+  getRandomPlacement(1, battlefildPlayer, boardFriendly);
+  getRandomPlacement(1, battlefildPlayer, boardFriendly);
+  getRandomPlacement(1, battlefildPlayer, boardFriendly);
+
+  for (let i = 0; i < boardFriendly.length; i++) {
+    for (let j = 0; j < boardFriendly.length; j++) {
+      cells.forEach((cell) => {
+        if (boardFriendly[i][j] !== 0) {
+          if (j == cell.dataset.x && i == cell.dataset.y) {
+            cell.style.backgroundColor = "rgb(65, 186, 168)";
+            cell.style.border = "1px solid black";
+
+            shipSelectionUp.style.zIndex = -10;
+            shipSelectionDown.style.zIndex = -10;
+
+            ships.forEach((ship) => (ship.style.display = "none"));
+          }
+        }
+      });
+    }
+  }
+
+  // TEST //
+
+  for (let i = 0; i < enemyBoardMatrix.length; i++) {
+    for (let j = 0; j < enemyBoardMatrix.length; j++) {
+      cellsEnemy.forEach((cell) => {
+        if (enemyBoardMatrix[i][j] !== 0) {
+          if (j == cell.dataset.x && i == cell.dataset.y) {
+            cell.style.backgroundColor = "green";
+            cell.style.border = "1px solid black";
+          }
+        }
+      });
+    }
+  }
+
+  // TEST //
+});
 
 // Начало: заполнение матрицы постановки кораблей противника
 
-function getStartShipPoint(shipDeck) {
+getRandomPlacement(4, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(3, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(3, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(2, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(2, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(2, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(1, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(1, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(1, battlefildEnemy, enemyBoardMatrix);
+getRandomPlacement(1, battlefildEnemy, enemyBoardMatrix);
+
+enemyBoard.style.zIndex = -10;
+
+function getRandomPlacement(shipDeck, battlefield, boardMatrix) {
   [cx, cy] = [getRandomInt(0, 10), getRandomInt(0, 10)];
 
-  // direction = getRandomInt(0, 2);
+  let direction = getRandomInt(0, 2);
 
-  direction = 1;
+  if (direction == 1) {
+    [lastShipDeckCx, lastShipDeckCy] = [cx + shipDeck - 1, cy];
+  } else if (direction == 0) {
+    [lastShipDeckCx, lastShipDeckCy] = [cx, cy + shipDeck - 1];
+  }
 
-  cellsEnemy.forEach((cell) => {
-    for (let i = 0; i < enemyBoardMatrix.length; i++) {
-      for (let j = 0; j < enemyBoardMatrix.length; j++) {
-        if (enemyBoardMatrix[i][j] == 1) {
-          // if (cell.dataset.x == j && cell.dataset.y == i) {
-          //   console.log(i, j);
-          //   // console.log(cell.dataset.x, cell.dataset.y);
-          // }
-        }
-        for (let k = 0; k < shipDeck; k++) {
-          if (cy == i && cx == j) {
-            if (
-              (enemyBoardMatrix[i].length - cx < shipDeck && direction == 1) ||
-              (enemyBoardMatrix[i].length - cy < shipDeck && direction == 0)
-            ) {
-              getStartShipPoint(shipDeck);
-            } else if (direction == 1) {
-              for (let y = cy - 1; y < cy + 2; y++) {
-                for (let x = cx - 1; x < cx + shipDeck + 1; x++) {
-                  if (cell.dataset.x == x && cell.dataset.y == y) {
-                    if (cx !== x && cy !== y) {
-                      // enemyBoardMatrix[i][j + k] = 2;
-                    }
-                    enemyBoardMatrix[y][x] = 1;
+  for (let item in battlefield) {
+    for (let key in battlefield[item]) {
+      if (
+        (cx == key && cy == battlefield[item][key]) ||
+        (lastShipDeckCx == key && lastShipDeckCy == battlefield[item][key])
+      ) {
+        return getRandomPlacement(shipDeck, battlefield, boardMatrix);
+      }
+    }
+  }
 
-                    cell.style.backgroundColor = "pink";
-                    cell.dataset.flag = "off";
-                  }
-                }
-              }
-            } else {
-              for (let y = cy - 1; y < cy + shipDeck + 1; y++) {
-                for (let x = cx - 1; x < cx + 2; x++) {
-                  if (cell.dataset.x == x && cell.dataset.y == y) {
-                    enemyBoardMatrix[i + k][j] = 1;
-                    cell.style.backgroundColor = "green";
-                    cell.dataset.flag = "off";
-                  }
-                }
+  if (
+    (boardMatrix.length - cx < shipDeck && direction == 1) ||
+    (boardMatrix.length - cy < shipDeck && direction == 0)
+  ) {
+    return getRandomPlacement(shipDeck, battlefield, boardMatrix);
+  }
+
+  if (direction == 1) {
+    for (let y = cy - 1; y < cy + 2; y++) {
+      for (let x = cx - 1; x < cx + shipDeck + 1; x++) {
+        for (let item in battlefield) {
+          if (item == y) {
+            for (let key in battlefield[item]) {
+              if (key == x) {
+                key = x;
+                battlefield[item][key] = y;
               }
             }
           }
         }
+        for (let k = 0; k < shipDeck; k++) {
+          if (cy == y && cx == x) {
+            boardMatrix[y][x + k] = 1;
+          }
+        }
       }
     }
-  });
-  return enemyBoardMatrix;
+  } else {
+    for (let y = cy - 1; y < cy + shipDeck + 1; y++) {
+      for (let x = cx - 1; x < cx + 2; x++) {
+        for (let item in battlefield) {
+          if (item == y) {
+            for (let key in battlefield[item]) {
+              if (key == x) {
+                key = x;
+                battlefield[item][key] = y;
+              }
+            }
+          }
+        }
+        for (let k = 0; k < shipDeck; k++) {
+          if (cy == y && cx == x) {
+            boardMatrix[y + k][x] = 1;
+          }
+        }
+      }
+    }
+  }
+
+  return boardMatrix;
 }
-
-// getStartShipPoint(4);
-// getStartShipPoint(3);
-// getStartShipPoint(3);
-// getStartShipPoint(2);
-// getStartShipPoint(2);
-
-// console.log(getStartShipPoint());
 
 // Конец: заполнение матрицы постановки кораблей противника
 
+console.log(boardFriendly);
 console.log(enemyBoardMatrix);
+
+// Начало: стрельба ИИ
+
+// Конец: стрельба ИИ
+
+// Начало: Уничтожение кораблей противника
+
+enemyBoard.addEventListener("click", function (event) {
+  for (let i = 0; i < enemyBoardMatrix.length; i++) {
+    for (let j = 0; j < enemyBoardMatrix.length; j++) {
+      if (
+        event.target.dataset.x == j &&
+        event.target.dataset.y == i &&
+        enemyBoardMatrix[i][j] == 1
+      ) {
+        event.target.style.backgroundColor = "red";
+        event.target.style.border = "1px solid black";
+        event.target.style.zIndex = -10;
+
+        enemyBoardMatrix[i][j] = 5;
+        // alert("Попадание!");
+
+        for (let y = i - 1; y < i + 2; y++) {
+          for (let x = j - 1; x < j + 2; x++) {
+            if (x >= 0 && y >= 0 && x < 10 && y < 10) {
+              if (enemyBoardMatrix[i][j] == 5) {
+                // console.log("Корабль потоплен!");
+                // console.log([j, i], [x, y], [i, x], [y, j]);
+                // if (
+                //   (event.target.dataset.x == i &&
+                //     event.target.dataset.y == x) ||
+                //   (event.target.dataset.x == y && event.target.dataset.y == j)
+                // ) {
+                //   console.log(event.target.dataset.x, event.target.dataset.y);
+                // }
+                // if (
+                //   enemyBoardMatrix[i][j + 1] !== 1 &&
+                //   enemyBoardMatrix[i + 1][j] !== 1 &&
+                //   enemyBoardMatrix[i][j - 1] !== 1 &&
+                //   enemyBoardMatrix[i - 1][j] !== 1
+                // ) {
+                //   console.log("Корабль потоплен!");
+                // }
+                // &&
+                // enemyBoardMatrix[i][x] !== 1 &&
+                // enemyBoardMatrix[y][j] !== 1
+              }
+            }
+          }
+        }
+      } else if (
+        event.target.dataset.x == j &&
+        event.target.dataset.y == i &&
+        enemyBoardMatrix[i][j] !== 1
+      ) {
+        event.target.style.backgroundColor = "yellow";
+        event.target.style.border = "1px solid black";
+        event.target.style.zIndex = -10;
+        // alert("Мимо!");
+      }
+    }
+  }
+});
+
+// Конец: Уничтожение кораблей противника
