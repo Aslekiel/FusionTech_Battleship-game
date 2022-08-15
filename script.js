@@ -93,7 +93,7 @@ for (let y = 0; y < 10; y++) {
 
 // Конец: построение сетки 10х10 для поля игрока и противника
 
-const cells = document.querySelectorAll(".board-cell");
+const cellsFriendly = document.querySelectorAll(".board-cell");
 
 const cellsEnemy = document.querySelectorAll(".board-cell__enemy");
 
@@ -568,7 +568,7 @@ independentButton.addEventListener("click", function () {
     };
 
     for (let j = 0; j < boardFriendly.length; j++) {
-      cells.forEach((cell) => (cell.style.backgroundColor = ""));
+      cellsFriendly.forEach((cell) => (cell.style.backgroundColor = ""));
       boardFriendly[i][j] = 0;
     }
     ships.forEach((ship) => (ship.style.display = ""));
@@ -596,7 +596,7 @@ randomButton.addEventListener("click", function (event) {
     };
 
     for (let j = 0; j < boardFriendly.length; j++) {
-      cells.forEach((cell) => (cell.style.backgroundColor = ""));
+      cellsFriendly.forEach((cell) => (cell.style.backgroundColor = ""));
       boardFriendly[i][j] = 0;
     }
   }
@@ -614,7 +614,7 @@ randomButton.addEventListener("click", function (event) {
 
   for (let i = 0; i < boardFriendly.length; i++) {
     for (let j = 0; j < boardFriendly.length; j++) {
-      cells.forEach((cell) => {
+      cellsFriendly.forEach((cell) => {
         if (boardFriendly[i][j] !== 0) {
           if (j == cell.dataset.x && i == cell.dataset.y) {
             cell.style.backgroundColor = "rgb(65, 186, 168)";
@@ -705,9 +705,9 @@ function getRandomPlacement(shipDeck, battlefield, boardMatrix) {
             }
           }
         }
-        for (let k = 0; k < shipDeck; k++) {
+        for (let k = 1; k <= shipDeck; k++) {
           if (cy == y && cx == x) {
-            boardMatrix[y][x + k] = 1;
+            boardMatrix[y][x + k - 1] = shipDeck;
           }
         }
       }
@@ -725,9 +725,9 @@ function getRandomPlacement(shipDeck, battlefield, boardMatrix) {
             }
           }
         }
-        for (let k = 0; k < shipDeck; k++) {
+        for (let k = 1; k <= shipDeck; k++) {
           if (cy == y && cx == x) {
-            boardMatrix[y + k][x] = 1;
+            boardMatrix[y + k - 1][x] = shipDeck;
           }
         }
       }
@@ -742,67 +742,213 @@ function getRandomPlacement(shipDeck, battlefield, boardMatrix) {
 console.log(boardFriendly);
 console.log(enemyBoardMatrix);
 
-// Начало: стрельба ИИ
-
-// Конец: стрельба ИИ
-
 // Начало: Уничтожение кораблей противника
 
+let countObj = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
 enemyBoard.addEventListener("click", function (event) {
-  for (let i = 0; i < enemyBoardMatrix.length; i++) {
-    for (let j = 0; j < enemyBoardMatrix.length; j++) {
-      if (
-        event.target.dataset.x == j &&
-        event.target.dataset.y == i &&
-        enemyBoardMatrix[i][j] == 1
+  let currentCellVar =
+    enemyBoardMatrix[event.target.dataset.y][event.target.dataset.x];
+
+  if (enemyBoardMatrix[event.target.dataset.y][event.target.dataset.x] !== 0) {
+    for (let key in countObj) {
+      if (key == currentCellVar) {
+        countObj[key]++;
+      }
+      if (countObj[key] > key && key == currentCellVar) {
+        countObj[key] = 1;
+      }
+    }
+  }
+
+  if (enemyBoardMatrix[event.target.dataset.y][event.target.dataset.x] !== 0) {
+    for (
+      let y = parseInt(event.target.dataset.y) - 1;
+      y < parseInt(event.target.dataset.y) + 2;
+      y++
+    ) {
+      for (
+        let x = parseInt(event.target.dataset.x) - 1;
+        x < parseInt(event.target.dataset.x) + 2;
+        x++
       ) {
-        event.target.style.backgroundColor = "red";
-        event.target.style.border = "1px solid black";
-        event.target.style.zIndex = -10;
-
-        enemyBoardMatrix[i][j] = 5;
-        // alert("Попадание!");
-
-        for (let y = i - 1; y < i + 2; y++) {
-          for (let x = j - 1; x < j + 2; x++) {
-            if (x >= 0 && y >= 0 && x < 10 && y < 10) {
-              if (enemyBoardMatrix[i][j] == 5) {
-                // console.log("Корабль потоплен!");
-                // console.log([j, i], [x, y], [i, x], [y, j]);
-                // if (
-                //   (event.target.dataset.x == i &&
-                //     event.target.dataset.y == x) ||
-                //   (event.target.dataset.x == y && event.target.dataset.y == j)
-                // ) {
-                //   console.log(event.target.dataset.x, event.target.dataset.y);
-                // }
-                // if (
-                //   enemyBoardMatrix[i][j + 1] !== 1 &&
-                //   enemyBoardMatrix[i + 1][j] !== 1 &&
-                //   enemyBoardMatrix[i][j - 1] !== 1 &&
-                //   enemyBoardMatrix[i - 1][j] !== 1
-                // ) {
-                //   console.log("Корабль потоплен!");
-                // }
-                // &&
-                // enemyBoardMatrix[i][x] !== 1 &&
-                // enemyBoardMatrix[y][j] !== 1
-              }
+        if (x >= 0 && y >= 0 && x < 10 && y < 10) {
+          cellsEnemy.forEach((cell) => {
+            if (
+              cell.dataset.x == x &&
+              cell.dataset.y == y &&
+              enemyBoardMatrix[y][x] == 0
+            ) {
+              cell.dataset.flag = "off";
             }
+          });
+
+          if (
+            (x !== parseInt(event.target.dataset.x) &&
+              y == parseInt(event.target.dataset.y)) ||
+            (x == parseInt(event.target.dataset.x) &&
+              y !== parseInt(event.target.dataset.y))
+          ) {
+            event.target.style.backgroundColor = "red";
+            event.target.style.border = "1px solid gray";
+            event.target.style.zIndex = -10;
           }
         }
-      } else if (
-        event.target.dataset.x == j &&
-        event.target.dataset.y == i &&
-        enemyBoardMatrix[i][j] !== 1
-      ) {
-        event.target.style.backgroundColor = "yellow";
-        event.target.style.border = "1px solid black";
-        event.target.style.zIndex = -10;
-        // alert("Мимо!");
       }
+    }
+  } else if (
+    enemyBoardMatrix[event.target.dataset.y][event.target.dataset.x] == 0
+  ) {
+    event.target.style.backgroundColor = "yellow";
+    event.target.style.border = "1px solid gray";
+    event.target.style.zIndex = -10;
+    event.target.dataset.flag = "off";
+    console.log("Мимо!");
+  }
+
+  for (let key in countObj) {
+    if (countObj[key] == currentCellVar && key == currentCellVar) {
+      cellsEnemy.forEach((cell) => {
+        if (cell.dataset.flag == "off") {
+          cell.style.backgroundColor = "yellow";
+          cell.style.zIndex = -10;
+        }
+      });
     }
   }
 });
 
 // Конец: Уничтожение кораблей противника
+
+// Начало: стрельба ИИ
+
+enemyBoard.addEventListener("click", checkShot);
+
+function checkShot(event) {
+  currentX = event.target.dataset.x;
+  currentY = event.target.dataset.y;
+  if (enemyBoardMatrix[currentY][currentX] == 0) {
+    getShot(boardFriendly, cellsFriendly);
+  } else {
+  }
+}
+
+function getShot(boardMatrix, cells) {
+  [cx, cy] = [getRandomInt(0, 10), getRandomInt(0, 10)];
+
+  cells.forEach((cell) => {
+    if (
+      cell.dataset.x == cx &&
+      cell.dataset.y == cy &&
+      cell.dataset.flag !== "on"
+    ) {
+      console.log("test");
+      getShot(boardMatrix, cells);
+    }
+  });
+
+  if (boardMatrix[cy][cx] == 0) {
+    cells.forEach((cell) => {
+      if (cell.dataset.x == cx && cell.dataset.y == cy) {
+        cell.style.backgroundColor = "yellow";
+        cell.dataset.flag = "off";
+      }
+    });
+  } else if (boardMatrix[cy][cx] == 1) {
+    for (let y = cy - 1; y < cy + 2; y++) {
+      for (let x = cx - 1; x < cx + 2; x++) {
+        if (x >= 0 && y >= 0 && x < 10 && y < 10) {
+          cells.forEach((cell) => {
+            if (cell.dataset.x == x && cell.dataset.y == y) {
+              cell.style.backgroundColor = "yellow";
+              cell.dataset.flag = "off";
+              console.log([y, x]);
+            } else if (cx == cell.dataset.x && cy == cell.dataset.y) {
+              cell.style.backgroundColor = "red";
+              cell.dataset.flag = "sunk";
+
+              enemyBoard.style.zIndex = -10;
+
+              setTimeout(() => {
+                getShot(boardMatrix, cells);
+                enemyBoard.style.zIndex = 0;
+              }, 1000);
+            }
+          });
+        }
+      }
+    }
+  }
+  // else {
+  //   cells.forEach((cell) => {
+  //     if (cell.dataset.x == cx && cell.dataset.y == cy) {
+  //       cell.style.backgroundColor = "red";
+  //       cell.dataset.flag = "off";
+
+  //       console.log([cy, cx]);
+
+  //       // enemyBoard.style.zIndex = -10;
+  //       // setTimeout(() => {
+  //       //   checkAroundCell(cell, cells, cx, cy, boardMatrix);
+  //       //   enemyBoard.style.zIndex = 0;
+  //       // }, 2000);
+  //     }
+  //   });
+  // }
+}
+
+function checkAroundCell(cell, cells, cx, cy, boardMatrix) {
+  let aroundCell = [];
+
+  someFunc(cell, cx, cy);
+  function someFunc(cell, cx, cy) {
+    for (
+      let y = parseInt(cell.dataset.y) - 1;
+      y < parseInt(cell.dataset.y) + 2;
+      y++
+    ) {
+      for (
+        let x = parseInt(cell.dataset.x) - 1;
+        x < parseInt(cell.dataset.x) + 2;
+        x++
+      ) {
+        if (x >= 0 && y >= 0 && x < 10 && y < 10) {
+          if ((cx !== x && cy == y) || (cx == x && cy !== y)) {
+            aroundCell.push([y, x]);
+          }
+        }
+      }
+    }
+  }
+
+  let randomRow = Math.floor(Math.random() * aroundCell.length);
+
+  console.log([aroundCell[randomRow][0], aroundCell[randomRow][1]]);
+  if (boardMatrix[aroundCell[randomRow][0]][aroundCell[randomRow][1]] !== 0) {
+    cells.forEach((cell) => {
+      if (
+        cell.dataset.x == aroundCell[randomRow][1] &&
+        cell.dataset.y == aroundCell[randomRow][0]
+      ) {
+        cell.style.backgroundColor = "red";
+        cell.dataset.flag = "off";
+
+        someFunc(cell, aroundCell[randomRow][1], aroundCell[randomRow][0]);
+      }
+    });
+  } else {
+    cells.forEach((cell) => {
+      if (
+        cell.dataset.x == aroundCell[randomRow][1] &&
+        cell.dataset.y == aroundCell[randomRow][0]
+      ) {
+        cell.style.backgroundColor = "blue";
+        cell.dataset.flag = "off";
+
+        someFunc(cell, cx, cy);
+      }
+    });
+  }
+}
+
+// Конец: стрельба ИИ
