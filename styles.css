@@ -65,8 +65,8 @@
 .board-player {
   display: flex;
   flex-direction: column;
-  width: 401px;
-  height: 401px;
+  width: 404px;
+  height: 404px;
   border: 2px solid blue;
   margin: 20px;
 }
@@ -82,8 +82,8 @@
 .board-enemy {
   display: flex;
   flex-direction: column;
-  width: 401px;
-  height: 401px;
+  width: 404px;
+  height: 404px;
   border: 2px solid red;
   margin: 20px;
 }
@@ -104,67 +104,71 @@
   background-color: rgb(65, 186, 168);
 }
 
-.battle-wagon-ver {
+.ship__wagon {
   width: 40px;
   height: 160px;
-  border: 2px solid grey;
+
+  transform: rotate(0) translate(0, 0);
 }
 
-.battle-wagon-hor {
-  width: 160px;
-  height: 40px;
-  border: 2px solid grey;
+.wagon--rotate {
+  width: 40px;
+  height: 160px;
+
+  transform: rotate(90deg) translate(-60px, -60px);
 }
 
-.battle-caser-ver {
+.ship__caser {
   width: 40px;
   height: 120px;
-  border: 2px solid grey;
+
+  transform: rotate(0) translate(0, 0);
 }
 
-.battle-caser-hor {
-  width: 120px;
-  height: 40px;
-  border: 2px solid grey;
+.caser--rotate {
+  width: 40px;
+  height: 120px;
+
+  transform: rotate(90deg) translate(-40px, -40px);
 }
 
-.battle-destroyer-ver {
+.ship__destroyer {
   width: 40px;
   height: 80px;
-  border: 2px solid grey;
+
+  transform: rotate(0) translate(0, 0);
+}
+.destroyer--rotate {
+  width: 40px;
+  height: 80px;
+
+  transform: rotate(90deg) translate(-20px, -20px);
 }
 
-.battle-destroyer-hor {
-  width: 80px;
-  height: 40px;
-  border: 2px solid grey;
-}
-
-.battle-boat {
+.ship__boat {
   width: 40px;
   height: 40px;
-  border: 2px solid grey;
 }
 
-/* .battle-wagon__deck {
-  border: 1px solid black;
+.battle-wagon__deck {
+  border: 1px solid grey;
   height: 25%;
 }
 
 .battle-caser__deck {
-  border: 1px solid black;
+  border: 1px solid grey;
   height: 33.33%;
 }
 
 .battle-destroyer__deck {
-  border: 1px solid black;
+  border: 1px solid grey;
   height: 50%;
 }
 
 .battle-boat__deck {
-  border: 1px solid black;
+  border: 1px solid grey;
   height: 100%;
-} */
+}
 
 .block-field {
   background-color: rgb(196, 192, 192);
