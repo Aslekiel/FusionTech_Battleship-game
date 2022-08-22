@@ -177,7 +177,7 @@
 
 .random-position-button {
   position: absolute;
-  top: 640px;
+  top: 560px;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 20px 15px;
@@ -186,7 +186,7 @@
 
 .independent-position-button {
   position: absolute;
-  top: 720px;
+  top: 640px;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 20px 27px;
@@ -195,9 +195,18 @@
 
 .start-button {
   position: absolute;
-  top: 800px;
+  top: 720px;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 20px 50px;
+  white-space: nowrap;
+}
+
+.reset-button {
+  position: absolute;
+  top: 800px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px 43px;
   white-space: nowrap;
 }

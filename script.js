@@ -15,12 +15,14 @@ const independentButton = document.querySelector(
   ".independent-position-button"
 );
 const startButton = document.querySelector(".start-button");
+const resetButton = document.querySelector(".reset-button");
 
 const shipNames = { 1: "boat", 2: "destroyer", 3: "caser", 4: "wagon" };
 const shipsOnBoardArray = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
 // Начало: Построение матрицы для игры
-
+let firstShipCoordinateArrayHorisonal = [];
+let firstShipCoordinateArrayVertical = [];
 const boardFriendly = [];
 const enemyBoardMatrix = [];
 
@@ -249,8 +251,10 @@ function getPlacement(currentDroppable, ship, battlefield, board) {
   checkShipInstallation(cx, cy, ship, shipSize, board);
 
   if (ship.classList.contains(`${shipNames[shipSize]}--rotate`)) {
+    firstShipCoordinateArrayHorisonal.push([cy, cx]);
     getHorisontalShip(cx, cy, shipSize, battlefield, board);
   } else if (ship.classList.contains(`ship__${shipNames[shipSize]}`)) {
+    firstShipCoordinateArrayVertical.push([cy, cx]);
     getVerticalShip(cx, cy, shipSize, battlefield, board);
   }
 
@@ -316,8 +320,6 @@ function getVerticalShip(cx, cy, shipSize, battlefield, board) {
 
 // Конец: Заполнение матрицы координатами
 
-console.log(boardFriendly);
-
 // Начало игры
 
 startButton.addEventListener("click", function () {
@@ -333,37 +335,27 @@ startButton.addEventListener("click", function () {
 
     renderingShips(boardFriendly, cellsFriendly);
 
-    // TEST //
-
-    for (let i = 0; i < enemyBoardMatrix.length; i++) {
-      for (let j = 0; j < enemyBoardMatrix.length; j++) {
-        cellsEnemy.forEach((cell) => {
-          if (enemyBoardMatrix[i][j] !== 0) {
-            if (j == cell.dataset.x && i == cell.dataset.y) {
-              cell.style.backgroundColor = "green";
-              cell.style.border = "1px solid grey";
-            }
-          }
-        });
-      }
-    }
-
-    // TEST //
-
     alert("Сделай свой ход!");
+    independentButton.style.zIndex = -10;
+    randomButton.style.zIndex = -10;
+    startButton.style.zIndex = -10;
   } else {
     alert("Не все корабли выставлены на поле!");
   }
 });
 
 independentButton.addEventListener("click", function (event) {
-  getFullBattlefieldMatrix(battlefieldPlayer);
   for (let i = 0; i < 10; i++) {
     for (let j = 0; j < boardFriendly.length; j++) {
       cellsFriendly.forEach((cell) => (cell.style.backgroundColor = ""));
       boardFriendly[i][j] = 0;
+      battlefieldPlayer[i][j] = "a";
     }
   }
+
+  firstShipCoordinateArrayHorisonal = [];
+  firstShipCoordinateArrayVertical = [];
+
   ships.forEach((ship) => (ship.style.display = ""));
   shipSelectionUp.style.zIndex = 0;
   shipSelectionDown.style.zIndex = 0;
@@ -373,37 +365,28 @@ independentButton.addEventListener("click", function (event) {
 });
 
 randomButton.addEventListener("click", function (event) {
-  getFullBattlefieldMatrix(battlefieldPlayer);
   for (let i = 0; i < 10; i++) {
     for (let j = 0; j < boardFriendly.length; j++) {
       cellsFriendly.forEach((cell) => (cell.style.backgroundColor = ""));
       boardFriendly[i][j] = 0;
+      battlefieldPlayer[i][j] = "a";
     }
     event.preventDefault();
   }
+
+  firstShipCoordinateArrayHorisonal = [];
+  firstShipCoordinateArrayVertical = [];
 
   for (let i = 0; i < shipsOnBoardArray.length; i++) {
     getRandomPlacement(shipsOnBoardArray[i], battlefieldPlayer, boardFriendly);
   }
 
   renderingShips(boardFriendly, cellsFriendly);
+});
 
-  // TEST //
-
-  for (let i = 0; i < enemyBoardMatrix.length; i++) {
-    for (let j = 0; j < enemyBoardMatrix.length; j++) {
-      cellsEnemy.forEach((cell) => {
-        if (enemyBoardMatrix[i][j] !== 0) {
-          if (j == cell.dataset.x && i == cell.dataset.y) {
-            cell.style.backgroundColor = "green";
-            cell.style.border = "1px solid grey";
-          }
-        }
-      });
-    }
-  }
-
-  // TEST //
+resetButton.addEventListener("click", function (event) {
+  location.reload();
+  event.preventDefault();
 });
 
 function renderingShips(board, cells) {
@@ -467,19 +450,21 @@ function getRandomPlacement(shipSize, battlefield, boardMatrix) {
   }
 
   if (direction == 1) {
+    firstShipCoordinateArrayHorisonal.push([cy, cx]);
     getHorisontalShip(cx, cy, shipSize, battlefield, boardMatrix);
   } else {
+    firstShipCoordinateArrayVertical.push([cy, cx]);
     getVerticalShip(cx, cy, shipSize, battlefield, boardMatrix);
   }
 
   return boardMatrix;
 }
-
 // Конец: заполнение матрицы постановки кораблей противника
 
 // Начало: Уничтожение кораблей противника
 
 let countObj = { 1: 0, 2: 0, 3: 0, 4: 0 };
+let counterWoundedDecksEnemy = 0;
 
 enemyBoard.addEventListener("click", function (event) {
   const [currentY, currentX] = [event.target.dataset.y, event.target.dataset.x];
@@ -497,6 +482,7 @@ enemyBoard.addEventListener("click", function (event) {
   }
 
   if (currentCellVar !== 0) {
+    counterWoundedDecksEnemy++;
     for (let y = parseInt(currentY) - 1; y < parseInt(currentY) + 2; y++) {
       for (let x = parseInt(currentX) - 1; x < parseInt(currentX) + 2; x++) {
         if (x >= 0 && y >= 0 && x < 10 && y < 10) {
@@ -517,16 +503,24 @@ enemyBoard.addEventListener("click", function (event) {
             event.target.style.backgroundColor = "red";
             event.target.style.border = "1px solid gray";
             event.target.style.zIndex = -10;
+            event.target.dataset.isWounded = "yes";
           }
         }
       }
     }
+
+    if (counterWoundedDecksEnemy == 20) {
+      enemyBoard.style.zIndex = -10;
+      setTimeout(() => {
+        alert("Ты победил!");
+      });
+    }
   } else if (currentCellVar == 0) {
-    event.target.style.backgroundColor = "yellow";
+    event.target.style.background =
+      "url('./img/circle-black-shape-svgrepo-com.svg') no-repeat center";
     event.target.style.border = "1px solid gray";
     event.target.style.zIndex = -10;
     event.target.dataset.flag = "off";
-    console.log("Мимо!");
   }
 
   for (let key in countObj) {
@@ -534,7 +528,8 @@ enemyBoard.addEventListener("click", function (event) {
       cellsEnemy.forEach((cell) => {
         if (cell.dataset.flag == "off") {
           setTimeout(() => {
-            cell.style.backgroundColor = "yellow";
+            cell.style.background =
+              "url('./img/circle-black-shape-svgrepo-com.svg') no-repeat center";
             cell.style.zIndex = -10;
           }, 100);
         }
@@ -549,876 +544,746 @@ enemyBoard.addEventListener("click", function (event) {
 
 enemyBoard.addEventListener("click", checkShot);
 
-let verifiedCoodinateCell, prevCoordinateCell;
-let secondShotCoordinateX, secondShotCoordinateY;
+let woundedY, woundedX;
+let randomAroundCellY, randomAroundCellX;
+let thirdWoundedDeckArray = [];
+let fourthWoundedDeckArray = [];
+
+let shotFlag = false;
+let thirdWoundedDeckFlag = false;
+let fourthWoundedDeckFlag = false;
+
+let counterWoundedDecksPlayer = 0;
 
 function checkShot(event) {
   currentX = event.target.dataset.x;
   currentY = event.target.dataset.y;
-  if (enemyBoardMatrix[currentY][currentX] == 0) {
-    shotCell(boardFriendly, cellsFriendly);
+  if (
+    enemyBoardMatrix[currentY][currentX] == 0 &&
+    !shotFlag &&
+    !thirdWoundedDeckFlag &&
+    !fourthWoundedDeckFlag
+  ) {
+    getRandomShot(boardFriendly, cellsFriendly);
+  } else if (shotFlag && !thirdWoundedDeckFlag && !fourthWoundedDeckFlag) {
+    checkAroundWoundedCell(woundedX, woundedY, cellsFriendly, boardFriendly);
+  } else if (thirdWoundedDeckFlag && !fourthWoundedDeckFlag) {
+    getThirdWoundedDeck(
+      thirdWoundedDeckArray,
+      cellsFriendly,
+      boardFriendly,
+      woundedY,
+      woundedX
+    );
+  } else if (fourthWoundedDeckFlag) {
+    lastShot(fourthWoundedDeckArray, cellsFriendly, boardFriendly);
   }
 }
 
-let hitShot = false;
-let secondShot = false;
+function getRandomCoordinatesForShot() {
+  const [cx, cy] = [getRandomInt(0, 10), getRandomInt(0, 10)];
+  return [cx, cy];
+}
 
-function shotCell(board, cellsArr) {
-  if (!hitShot) {
-    [cx, cy] = [getRandomInt(0, 10), getRandomInt(0, 10)];
+let counterWagon = 0;
+let counterCaser = 0;
+let counterDestroyer = 0;
+let counterBoat = 0;
+
+let woundedDecksArrayHorisontal = [];
+let woundedDecksArrayVertical = [];
+
+function getWoundedDeck(cell) {
+  cell.style.backgroundColor = "red";
+  cell.dataset.isWounded = "yes";
+  cell.dataset.flag = "off";
+  counterWoundedDecksPlayer++;
+  if (counterWoundedDecksPlayer == 20) {
+    enemyBoard.style.zIndex = -10;
+    setTimeout(() => {
+      alert("Ты проиграл!");
+      for (let i = 0; i < enemyBoardMatrix.length; i++) {
+        for (let j = 0; j < enemyBoardMatrix.length; j++) {
+          cellsEnemy.forEach((cell) => {
+            if (enemyBoardMatrix[i][j] !== 0) {
+              if (
+                j == cell.dataset.x &&
+                i == cell.dataset.y &&
+                cell.dataset.isWounded !== "yes"
+              ) {
+                cell.style.backgroundColor = "green";
+                cell.style.border = "1px solid grey";
+              }
+            }
+          });
+        }
+      }
+    }, 500);
+  }
+
+  const shipSize = boardFriendly[cell.dataset.y][cell.dataset.x];
+
+  if (boardFriendly[cell.dataset.y][cell.dataset.x] == 4) {
+    counterWagon++;
+    isShipWounded(cell);
+    if (counterWagon == 4) {
+      counterWagon = 0;
+      if (woundedDecksArrayHorisontal.length) {
+        sunkDeckHorisontal(
+          woundedDecksArrayHorisontal,
+          cellsFriendly,
+          shipSize
+        );
+      } else if (woundedDecksArrayVertical.length) {
+        sunkDeckVertical(woundedDecksArrayVertical, cellsFriendly, shipSize);
+      }
+    }
+  } else if (boardFriendly[cell.dataset.y][cell.dataset.x] == 3) {
+    counterCaser++;
+    isShipWounded(cell);
+    if (counterCaser == 3) {
+      counterCaser = 0;
+      if (woundedDecksArrayHorisontal.length) {
+        sunkDeckHorisontal(
+          woundedDecksArrayHorisontal,
+          cellsFriendly,
+          shipSize
+        );
+      } else if (woundedDecksArrayVertical.length) {
+        sunkDeckVertical(woundedDecksArrayVertical, cellsFriendly, shipSize);
+      }
+    }
+  } else if (boardFriendly[cell.dataset.y][cell.dataset.x] == 2) {
+    counterDestroyer++;
+    isShipWounded(cell);
+    if (counterDestroyer == 2) {
+      counterDestroyer = 0;
+      if (woundedDecksArrayHorisontal.length) {
+        sunkDeckHorisontal(
+          woundedDecksArrayHorisontal,
+          cellsFriendly,
+          shipSize
+        );
+      } else if (woundedDecksArrayVertical.length) {
+        sunkDeckVertical(woundedDecksArrayVertical, cellsFriendly, shipSize);
+      }
+    }
   } else {
-    [cx, cy] = [prevCoordinateCell[1], prevCoordinateCell[0]];
-  }
-
-  if (secondShot) {
-    [cx, cy] = [secondShotCoordinateX, secondShotCoordinateY];
-  }
-
-  let recurringCell = false;
-
-  // console.log([cy, cx], prevCoordinateCell, verifiedCoodinateCell);
-
-  cellsArr.forEach((cell) => {
-    if (
-      cell.dataset.y == cy &&
-      cell.dataset.x == cx &&
-      cell.dataset.flag == "off" &&
-      hitShot !== true &&
-      secondShot !== true
-    ) {
-      if (!recurringCell) {
-        shotCell(board, cellsArr);
-        recurringCell = true;
+    counterBoat++;
+    isShipWounded(cell);
+    if (counterBoat == 1) {
+      counterBoat = 0;
+      if (woundedDecksArrayHorisontal.length) {
+        sunkDeckHorisontal(
+          woundedDecksArrayHorisontal,
+          cellsFriendly,
+          shipSize
+        );
+      } else if (woundedDecksArrayVertical.length) {
+        sunkDeckVertical(woundedDecksArrayVertical, cellsFriendly, shipSize);
       }
     }
-
-    if (cell.dataset.y == cy && cell.dataset.x == cx && board[cy][cx] == 0) {
-      enemyBoard.style.zIndex = -10;
-      setTimeout(() => {
-        cell.style.backgroundColor = "yellow";
-        enemyBoard.style.zIndex = 0;
-        cell.dataset.flag = "off";
-      }, 500);
-    } else if (
-      cell.dataset.y == cy &&
-      cell.dataset.x == cx &&
-      board[cy][cx] !== 0
-    ) {
-      enemyBoard.style.zIndex = -10;
-      setTimeout(() => {
-        cell.style.backgroundColor = "red";
-        enemyBoard.style.zIndex = 0;
-        cell.dataset.flag = "off";
-        cell.dataset.isWounded = "yes";
-
-        if (secondShot !== true) {
-          checkAroundCell(cy, cx, cellsFriendly);
-          checkShipDeck(
-            verifiedCoodinateCell,
-            prevCoordinateCell,
-            cellsFriendly,
-            boardFriendly
-          );
-        } else if (board[cy][cx] == 3 && secondShot == true) {
-          secondShot = false;
-          shotCell(boardFriendly, cellsFriendly);
-        } else if (board[cy][cx] == 4 && secondShot == true) {
-          secondShot = false;
-          shotCell(boardFriendly, cellsFriendly);
-          if (cx > verifiedCoodinateCell[1] || cx > prevCoordinateCell[1]) {
-            if (cell.dataset.x == parseInt(cx) + 1 && cell.dataset.y == cy) {
-              cell.style.backgroundColor = "red";
-              enemyBoard.style.zIndex = 0;
-              cell.dataset.flag = "off";
-              cell.dataset.isWounded = "yes";
-            }
-          } else if (
-            cx < verifiedCoodinateCell[1] ||
-            cx < prevCoordinateCell[1]
-          ) {
-            if (cell.dataset.x == cx - 1 && cell.dataset.y == cy) {
-              cell.style.backgroundColor = "red";
-              enemyBoard.style.zIndex = 0;
-              cell.dataset.flag = "off";
-              cell.dataset.isWounded = "yes";
-            }
-          } else {
-            secondShot = false;
-            shotCell(boardFriendly, cellsFriendly);
-          }
-        }
-      }, 500);
-    }
-  });
-}
-
-function checkAroundCell(cy, cx, cellsArr) {
-  let currentCellArr = [];
-  let filterArr = [];
-
-  cellsArr.forEach((cell) => {
-    if (cell.dataset.x == cx && cell.dataset.y == cy) {
-      for (let y = cy - 1; y < cy + 2; y++) {
-        for (let x = cx - 1; x < cx + 2; x++) {
-          if (x >= 0 && y >= 0 && x < 10 && y < 10) {
-            if ((cx !== x && cy == y) || (cx == x && cy !== y)) {
-              currentCellArr.push([y, x]);
-            }
-          }
-        }
-      }
-    }
-  });
-  cellsArr.forEach((cell) => {
-    for (let key in currentCellArr) {
-      if (
-        cell.dataset.x == currentCellArr[key][1] &&
-        cell.dataset.y == currentCellArr[key][0]
-      ) {
-        if (cell.dataset.flag !== "off" && cell.dataset.isWounded !== "yes") {
-          filterArr.push([currentCellArr[key][0], currentCellArr[key][1]]);
-        }
-      }
-    }
-  });
-
-  randomCell = Math.floor(Math.random() * filterArr.length);
-
-  if (filterArr.length !== 0) {
-    prevCoordinateCell = [cy, cx];
-    verifiedCoodinateCell = [
-      filterArr[randomCell][0],
-      filterArr[randomCell][1],
-    ];
   }
 }
 
-function checkShipDeck(
-  verifiedCoodinateCell,
-  prevCoordinateCell,
-  cellsFriendly,
-  boardFriendly
-) {
-  let currentY = verifiedCoodinateCell[0];
-  let currentX = verifiedCoodinateCell[1];
-
-  let prevY = prevCoordinateCell[0];
-  let prevX = prevCoordinateCell[1];
-
-  enemyBoard.style.zIndex = -10;
-
-  cellsFriendly.forEach((cell) => {
+function isShipWounded(cell) {
+  for (let i = 0; i < firstShipCoordinateArrayHorisonal.length; i++) {
     if (
-      cell.dataset.x == currentX &&
-      cell.dataset.y == currentY &&
-      boardFriendly[currentY][currentX] == 0 &&
-      boardFriendly[prevY][prevX] !== 1
+      firstShipCoordinateArrayHorisonal[i][0] == cell.dataset.y &&
+      firstShipCoordinateArrayHorisonal[i][1] == cell.dataset.x
     ) {
-      hitShot = true;
-      setTimeout(() => {
-        cell.style.backgroundColor = "yellow";
-        enemyBoard.style.zIndex = 0;
-        cell.dataset.flag = "off";
-      }, 500);
+      woundedDecksArrayHorisontal.push([
+        parseInt(cell.dataset.y),
+        parseInt(cell.dataset.x),
+      ]);
     }
-
-    // Для однопалубного
+  }
+  for (let j = 0; j < firstShipCoordinateArrayVertical.length; j++) {
     if (
-      cell.dataset.x == prevX &&
-      cell.dataset.y == prevY &&
-      boardFriendly[prevY][prevX] == 1
+      firstShipCoordinateArrayVertical[j][0] == cell.dataset.y &&
+      firstShipCoordinateArrayVertical[j][1] == cell.dataset.x
     ) {
-      hitShot = false;
-      setTimeout(() => {
-        enemyBoard.style.zIndex = 0;
-        cell.dataset.flag = "off";
-        showFreeCellsBoat(prevY, prevX, cellsFriendly);
-        shotCell(boardFriendly, cellsFriendly);
-      }, 500);
+      woundedDecksArrayVertical.push([
+        parseInt(cell.dataset.y),
+        parseInt(cell.dataset.x),
+      ]);
     }
-
-    // Для двухпалубного
-
-    if (
-      cell.dataset.x == currentX &&
-      cell.dataset.y == currentY &&
-      boardFriendly[currentY][currentX] == 2
-    ) {
-      hitShot = false;
-      setTimeout(() => {
-        cell.style.backgroundColor = "red";
-        enemyBoard.style.zIndex = 0;
-        cell.dataset.flag = "off";
-        cell.dataset.isWounded = "yes";
-        if (currentY == prevY) {
-          showFreeCellsHorisontalShip(
-            currentY,
-            currentX,
-            prevY,
-            prevX,
-            cellsFriendly
-          );
-        } else {
-          showFreeCellsVerticalShip(
-            currentY,
-            currentX,
-            prevY,
-            prevX,
-            cellsFriendly
-          );
-        }
-
-        shotCell(boardFriendly, cellsFriendly);
-      }, 1000);
-    }
-
-    // Для трехпалубного
-
-    if (
-      cell.dataset.x == currentX &&
-      cell.dataset.y == currentY &&
-      boardFriendly[currentY][currentX] == 3
-    ) {
-      hitShot = false;
-
-      setTimeout(() => {
-        cell.style.backgroundColor = "red";
-        enemyBoard.style.zIndex = 0;
-        cell.dataset.flag = "off";
-        cell.dataset.isWounded = "yes";
-      }, 500);
-      if (currentY == prevY && boardFriendly[currentY][currentX] == 3) {
-        checkHorisontalCellsForBattleCaser(
-          currentX,
-          currentY,
-          prevX,
-          prevY,
-          cellsFriendly,
-          boardFriendly
-        );
-      } else if (currentX == prevX && boardFriendly[currentY][currentX] == 3) {
-        checkVerticalCellsForBattleCaser(
-          currentX,
-          currentY,
-          prevX,
-          prevY,
-          cellsFriendly,
-          boardFriendly
-        );
-      }
-    }
-    // Для  четырехпалубного
-
-    if (
-      cell.dataset.x == currentX &&
-      cell.dataset.y == currentY &&
-      boardFriendly[currentY][currentX] == 4
-    ) {
-      hitShot = false;
-
-      setTimeout(() => {
-        cell.style.backgroundColor = "red";
-        enemyBoard.style.zIndex = 0;
-        cell.dataset.flag = "off";
-        cell.dataset.isWounded = "yes";
-      }, 500);
-      if (currentY == prevY && boardFriendly[currentY][currentX] == 4) {
-        checkHorisontalCellsForWagon(
-          currentX,
-          currentY,
-          prevX,
-          prevY,
-          cellsFriendly,
-          boardFriendly
-        );
-      } else if (currentX == prevX && boardFriendly[currentY][currentX] == 4) {
-        console.log("poka nichego");
-      }
-    }
-  });
+  }
 }
 
-function showFreeCellsBoat(prevY, prevX, cells) {
-  for (let y = parseInt(prevY) - 1; y < parseInt(prevY) + 2; y++) {
-    for (let x = parseInt(prevX) - 1; x < parseInt(prevX) + 2; x++) {
+function sunkDeckHorisontal(arrayDecks, cells, shipSize) {
+  for (let y = arrayDecks[0][0] - 1; y < arrayDecks[0][0] + 2; y++) {
+    for (
+      let x = arrayDecks[0][1] - 1;
+      x < arrayDecks[0][1] + shipSize + 1;
+      x++
+    ) {
       if (x >= 0 && y >= 0 && x < 10 && y < 10) {
         cells.forEach((cell) => {
-          if (cell.dataset.x == x && cell.dataset.y == y) {
-            cell.style.backgroundColor = "yellow";
-            cell.dataset.flag = "off";
-          } else if (prevY == cell.dataset.y && prevX == cell.dataset.x) {
-            cell.style.backgroundColor = "red";
-            cell.dataset.flag = "off";
-          }
-        });
-      }
-    }
-  }
-}
-
-function showFreeCellsHorisontalShip(currentY, currentX, prevY, prevX, cells) {
-  const shipDecks = boardFriendly[currentY][currentX];
-
-  if (currentX < prevX) {
-    for (let y = parseInt(currentY) - 1; y < parseInt(currentY) + 2; y++) {
-      for (
-        let x = parseInt(currentX) - 1;
-        x < parseInt(currentX) + shipDecks + 1;
-        x++
-      ) {
-        if (x >= 0 && y >= 0 && x < 10 && y < 10) {
-          cells.forEach((cell) => {
-            if (
-              cell.dataset.x == x &&
-              cell.dataset.y == y &&
-              cell.dataset.isWounded !== "yes"
-            ) {
-              cell.style.backgroundColor = "yellow";
-              cell.dataset.flag = "off";
-            } else if (cell.dataset.isWounded == "yes") {
-              cell.style.backgroundColor = "red";
-              cell.dataset.flag = "off";
-            }
-          });
-        }
-      }
-    }
-  } else {
-    for (let y = parseInt(prevY) - 1; y < parseInt(prevY) + 2; y++) {
-      for (
-        let x = parseInt(prevX) - 1;
-        x < parseInt(prevX) + shipDecks + 1;
-        x++
-      ) {
-        if (x >= 0 && y >= 0 && x < 10 && y < 10) {
-          cells.forEach((cell) => {
-            if (
-              cell.dataset.x == x &&
-              cell.dataset.y == y &&
-              cell.dataset.isWounded !== "yes"
-            ) {
-              cell.style.backgroundColor = "yellow";
-              cell.dataset.flag = "off";
-            } else if (cell.dataset.isWounded == "yes") {
-              cell.style.backgroundColor = "red";
-              cell.dataset.flag = "off";
-            }
-          });
-        }
-      }
-    }
-  }
-}
-
-function showFreeCellsVerticalShip(currentY, currentX, prevY, prevX, cells) {
-  const shipDecks = boardFriendly[currentY][currentX];
-
-  if (currentY < prevY) {
-    for (
-      let y = parseInt(currentY) - 1;
-      y < parseInt(currentY) + shipDecks + 1;
-      y++
-    ) {
-      for (let x = parseInt(currentX) - 1; x < parseInt(currentX) + 2; x++) {
-        if (x >= 0 && y >= 0 && x < 10 && y < 10) {
-          cells.forEach((cell) => {
-            if (cell.dataset.x == x && cell.dataset.y == y) {
-              cell.style.backgroundColor = "yellow";
-              cell.dataset.flag = "off";
-            } else if (
-              (currentY == cell.dataset.y && currentX == cell.dataset.x) ||
-              (prevY == cell.dataset.y && prevX == cell.dataset.x)
-            ) {
-              cell.style.backgroundColor = "red";
-              cell.dataset.flag = "off";
-            }
-          });
-        }
-      }
-    }
-  } else {
-    for (
-      let y = parseInt(prevY) - 1;
-      y < parseInt(prevY) + shipDecks + 1;
-      y++
-    ) {
-      for (let x = parseInt(prevX) - 1; x < parseInt(prevX) + 2; x++) {
-        if (x >= 0 && y >= 0 && x < 10 && y < 10) {
-          cells.forEach((cell) => {
-            if (cell.dataset.x == x && cell.dataset.y == y) {
-              cell.style.backgroundColor = "yellow";
-              cell.dataset.flag = "off";
-            } else if (
-              (currentY == cell.dataset.y && currentX == cell.dataset.x) ||
-              (prevY == cell.dataset.y && prevX == cell.dataset.x)
-            ) {
-              cell.style.backgroundColor = "red";
-              cell.dataset.flag = "off";
-            }
-          });
-        }
-      }
-    }
-  }
-}
-
-function checkHorisontalCellsForBattleCaser(
-  currentX,
-  currentY,
-  prevX,
-  prevY,
-  cellsFriendly,
-  boardFriendly
-) {
-  let checkedCells = [];
-  let resultCheckedCells = [];
-
-  if (prevX > currentX) {
-    if (prevX - 2 < 0) {
-      checkedCells = [[currentY, prevX + 1]];
-    } else if (prevX + 1 > 9) {
-      checkedCells = [[currentY, prevX - 2]];
-    } else {
-      checkedCells = [
-        [currentY, prevX + 1],
-        [currentY, prevX - 2],
-      ];
-    }
-  } else {
-    if (currentX - 2 < 0) {
-      checkedCells = [[currentY, currentX + 1]];
-    } else if (currentX + 1 > 9) {
-      checkedCells = [[currentY, currentX - 2]];
-    } else {
-      checkedCells = [
-        [currentY, currentX - 2],
-        [currentY, currentX + 1],
-      ];
-    }
-  }
-
-  cellsFriendly.forEach((cell) => {
-    for (let i = 0; i < checkedCells.length; i++) {
-      if (
-        cell.dataset.x == checkedCells[i][1] &&
-        cell.dataset.y == checkedCells[i][0] &&
-        cell.dataset.flag == "on"
-      ) {
-        resultCheckedCells.push(checkedCells[i]);
-      }
-    }
-  });
-
-  randomCell = Math.floor(Math.random() * resultCheckedCells.length);
-
-  secondShotCoordinateX = resultCheckedCells[randomCell][1];
-  secondShotCoordinateY = resultCheckedCells[randomCell][0];
-
-  if (boardFriendly[secondShotCoordinateY][secondShotCoordinateX] !== 0) {
-    enemyBoard.style.zIndex = -10;
-
-    if (
-      boardFriendly[currentY][currentX] == 3 &&
-      boardFriendly[prevY][prevX] == 3
-    ) {
-      hitShot = false;
-      secondShot = false;
-
-      setTimeout(() => {
-        enemyBoard.style.zIndex = 0;
-        cellsFriendly.forEach((cell) => {
           if (
-            cell.dataset.x == secondShotCoordinateX &&
-            cell.dataset.y == secondShotCoordinateY
+            cell.dataset.x == x &&
+            cell.dataset.y == y &&
+            cell.dataset.isWounded !== "yes"
           ) {
-            cell.style.backgroundColor = "red";
-
-            cell.dataset.flag = "off";
+            woundedDecksArrayHorisontal = [];
+            getMissCell(cell);
           }
         });
-        // showFreeCellsHorisontalShip(
-        //   currentY,
-        //   currentX,
-        //   prevY,
-        //   prevX,
-        //   cellsFriendly
-        // );
-        shotCell(boardFriendly, cellsFriendly);
-      }, 1500);
-    }
-  } else {
-    console.log("ne popal");
-    secondShot = true;
-
-    setTimeout(() => {
-      enemyBoard.style.zIndex = 0;
-
-      cellsFriendly.forEach((cell) => {
-        if (
-          cell.dataset.x == secondShotCoordinateX &&
-          cell.dataset.y == secondShotCoordinateY
-        ) {
-          cell.style.backgroundColor = "yellow";
-
-          cell.dataset.flag = "off";
-        }
-      });
-
-      if (boardFriendly[checkedCells[0][0]][checkedCells[0][1]] == 0) {
-        secondShotCoordinateX = checkedCells[1][1];
-        secondShotCoordinateY = checkedCells[1][0];
-      } else {
-        secondShotCoordinateX = checkedCells[0][1];
-        secondShotCoordinateY = checkedCells[0][0];
       }
-    }, 1000);
+    }
   }
 }
 
-function checkVerticalCellsForBattleCaser(
-  currentX,
-  currentY,
-  prevX,
-  prevY,
-  cellsFriendly,
-  boardFriendly
-) {
-  let checkedCells = [];
-  let resultCheckedCells = [];
-
-  if (prevY > currentY) {
-    if (prevY - 2 < 0) {
-      checkedCells = [[prevY + 1, currentX]];
-    } else if (prevX + 1 > 9) {
-      checkedCells = [[prevY - 2, currentX]];
-    } else {
-      checkedCells = [
-        [prevY + 1, currentX],
-        [prevY - 2, currentX],
-      ];
-    }
-  } else {
-    if (currentY - 2 < 0) {
-      checkedCells = [[currentY + 1, currentX]];
-    } else if (currentY + 1 > 9) {
-      checkedCells = [[currentY - 2, currentX]];
-    } else {
-      checkedCells = [
-        [currentY - 2, currentX],
-        [currentY + 1, currentX],
-      ];
-    }
-  }
-
-  cellsFriendly.forEach((cell) => {
-    for (let i = 0; i < checkedCells.length; i++) {
-      if (
-        cell.dataset.x == checkedCells[i][1] &&
-        cell.dataset.y == checkedCells[i][0] &&
-        cell.dataset.flag == "on"
-      ) {
-        resultCheckedCells.push(checkedCells[i]);
-      }
-    }
-  });
-
-  randomCell = Math.floor(Math.random() * resultCheckedCells.length);
-
-  secondShotCoordinateX = resultCheckedCells[randomCell][1];
-  secondShotCoordinateY = resultCheckedCells[randomCell][0];
-
-  if (boardFriendly[secondShotCoordinateY][secondShotCoordinateX] !== 0) {
-    enemyBoard.style.zIndex = -10;
-
-    if (
-      boardFriendly[currentY][currentX] == 3 &&
-      boardFriendly[prevY][prevX] == 3
-    ) {
-      hitShot = false;
-      secondShot = false;
-
-      setTimeout(() => {
-        enemyBoard.style.zIndex = 0;
-        cellsFriendly.forEach((cell) => {
+function sunkDeckVertical(arrayDecks, cells, shipSize) {
+  for (let y = arrayDecks[0][0] - 1; y < arrayDecks[0][0] + shipSize + 1; y++) {
+    for (let x = arrayDecks[0][1] - 1; x < arrayDecks[0][1] + 2; x++) {
+      if (x >= 0 && y >= 0 && x < 10 && y < 10) {
+        cells.forEach((cell) => {
           if (
-            cell.dataset.x == secondShotCoordinateX &&
-            cell.dataset.y == secondShotCoordinateY
+            cell.dataset.x == x &&
+            cell.dataset.y == y &&
+            cell.dataset.isWounded !== "yes"
           ) {
-            cell.style.backgroundColor = "red";
-
-            cell.dataset.flag = "off";
+            woundedDecksArrayVertical = [];
+            getMissCell(cell);
           }
         });
-        // showFreeCellsVerticalShip(
-        //   currentY,
-        //   currentX,
-        //   prevY,
-        //   prevX,
-        //   cellsFriendly
-        // );
-        shotCell(boardFriendly, cellsFriendly);
-      }, 1500);
-    }
-  } else {
-    secondShot = true;
-
-    setTimeout(() => {
-      enemyBoard.style.zIndex = 0;
-
-      cellsFriendly.forEach((cell) => {
-        if (
-          cell.dataset.x == secondShotCoordinateX &&
-          cell.dataset.y == secondShotCoordinateY
-        ) {
-          cell.style.backgroundColor = "yellow";
-
-          cell.dataset.flag = "off";
-        }
-      });
-
-      if (boardFriendly[checkedCells[0][0]][checkedCells[0][1]] == 0) {
-        secondShotCoordinateX = checkedCells[1][1];
-        secondShotCoordinateY = checkedCells[1][0];
-      } else {
-        secondShotCoordinateX = checkedCells[0][1];
-        secondShotCoordinateY = checkedCells[0][0];
       }
-    }, 1000);
+    }
   }
 }
 
-function checkHorisontalCellsForWagon(
-  currentX,
-  currentY,
-  prevX,
-  prevY,
-  cellsFriendly,
-  boardFriendly
-) {
-  let adjacentCells = [];
-  let resultAdjacentCells = [];
+function getMissCell(cell) {
+  setTimeout(() => {
+    cell.style.background =
+      "url('./img/circle-black-shape-svgrepo-com.svg') no-repeat center";
+    cell.dataset.flag = "off";
+  }, 500);
+}
 
-  if (prevX > currentX) {
-    if (prevX + 1 > 9) {
-      adjacentCells = [currentY, currentX - 1];
-    } else if (currentX - 1 < 0) {
-      adjacentCells = [currentY, prevX + 1];
-    } else {
-      adjacentCells = [
-        [currentY, currentX - 1],
-        [currentY, prevX + 1],
-      ];
-    }
-  } else {
-    if (currentX + 1 > 9) {
-      adjacentCells = [currentY, prevX - 1];
-    } else if (prevX - 1 < 0) {
-      adjacentCells = [currentY, currentX + 1];
-    } else {
-      adjacentCells = [
-        [currentY, currentX + 1],
-        [currentY, prevX - 1],
-      ];
-    }
-  }
+function getRandomShot(board, cells) {
+  const [shotX, shotY] = getRandomCoordinatesForShot();
 
-  cellsFriendly.forEach((cell) => {
-    for (let i = 0; i < adjacentCells.length; i++) {
-      if (
-        cell.dataset.x == adjacentCells[i][1] &&
-        cell.dataset.y == adjacentCells[i][0] &&
-        cell.dataset.flag == "on"
-      ) {
-        resultAdjacentCells.push(adjacentCells[i]);
-      }
-    }
-  });
-
-  console.log("start", [currentY, currentX]);
-  console.log("prev", [prevY, prevX]);
-
-  if (resultAdjacentCells.length == 1) {
-    hitShot = false;
+  cells.forEach((cell) => {
+    const conditionCoordinates =
+      cell.dataset.x == shotX && cell.dataset.y == shotY;
     if (
-      resultAdjacentCells[0][1] > currentX ||
-      resultAdjacentCells[0][1] > prevX
+      conditionCoordinates &&
+      board[shotY][shotX] !== 0 &&
+      board[shotY][shotX] !== 1 &&
+      cell.dataset.flag == "on"
     ) {
-      cellsFriendly.forEach((cell) => {
-        if (
-          cell.dataset.x == resultAdjacentCells[0][1] + 1 &&
-          cell.dataset.y == resultAdjacentCells[0][0]
-        ) {
-          setTimeout(() => {
-            cell.style.backgroundColor = "red";
-            enemyBoard.style.zIndex = 0;
-            cell.dataset.flag = "off";
-            cell.dataset.isWounded = "yes";
-          }, 1500);
-        } else if (
-          cell.dataset.x == resultAdjacentCells[0][1] &&
-          cell.dataset.y == resultAdjacentCells[0][0]
-        ) {
-          setTimeout(() => {
-            cell.style.backgroundColor = "red";
-            enemyBoard.style.zIndex = 0;
-            cell.dataset.flag = "off";
-            cell.dataset.isWounded = "yes";
-          }, 1000);
-        }
-      });
+      getWoundedDeck(cell);
+      checkAroundWoundedCell(shotX, shotY, cells, board);
     } else if (
-      resultAdjacentCells[0][1] < currentX ||
-      resultAdjacentCells[0][1] < prevX
+      conditionCoordinates &&
+      board[shotY][shotX] == 0 &&
+      cell.dataset.flag == "on"
     ) {
-      cellsFriendly.forEach((cell) => {
-        if (
-          cell.dataset.x == resultAdjacentCells[0][1] - 1 &&
-          cell.dataset.y == resultAdjacentCells[0][0]
-        ) {
-          setTimeout(() => {
-            cell.style.backgroundColor = "red";
-            enemyBoard.style.zIndex = 0;
-            cell.dataset.flag = "off";
-            cell.dataset.isWounded = "yes";
-          }, 1500);
-        } else if (
-          cell.dataset.x == resultAdjacentCells[0][1] &&
-          cell.dataset.y == resultAdjacentCells[0][0]
-        ) {
-          setTimeout(() => {
-            cell.style.backgroundColor = "red";
-            enemyBoard.style.zIndex = 0;
-            cell.dataset.flag = "off";
-            cell.dataset.isWounded = "yes";
-          }, 1000);
+      getMissCell(cell);
+    } else if (
+      (conditionCoordinates && cell.dataset.flag == "off") ||
+      (conditionCoordinates && cell.dataset.isWounded == "yes")
+    ) {
+      getRandomShot(board, cells);
+    } else if (conditionCoordinates && board[shotY][shotX] == 1) {
+      getWoundedDeck(cell);
+      getRandomShot(board, cells);
+    }
+  });
+}
+
+function checkAroundWoundedCell(shotX, shotY, cells, board) {
+  const allCellsArr = [];
+  let filteredCellsArr = [];
+
+  cells.forEach((cell) => {
+    if (cell.dataset.x == shotX && cell.dataset.y == shotY) {
+      for (let y = shotY - 1; y < shotY + 2; y++) {
+        for (let x = shotX - 1; x < shotX + 2; x++) {
+          if (x >= 0 && y >= 0 && x < 10 && y < 10) {
+            if ((shotX !== x && shotY == y) || (shotX == x && shotY !== y)) {
+              allCellsArr.push([y, x]);
+            }
+          }
         }
-      });
-      setTimeout(() => {
-        shotCell(boardFriendly, cellsFriendly);
-      }, 2000);
+      }
+    }
+  });
+
+  cells.forEach((cell) => {
+    for (let key in allCellsArr) {
+      if (
+        cell.dataset.x == allCellsArr[key][1] &&
+        cell.dataset.y == allCellsArr[key][0]
+      ) {
+        if (cell.dataset.flag !== "off" && cell.dataset.isWounded !== "yes") {
+          filteredCellsArr.push([allCellsArr[key][0], allCellsArr[key][1]]);
+        }
+      }
+    }
+  });
+
+  checkRandomAroundCell(shotY, shotX, filteredCellsArr, cells, board);
+}
+
+function checkRandomAroundCell(shotY, shotX, aroundCellsArray, cells, board) {
+  [woundedY, woundedX] = [shotY, shotX];
+  shotFlag = false;
+
+  const randomIndex = Math.floor(Math.random() * aroundCellsArray.length);
+
+  [randomAroundCellY, randomAroundCellX] = [
+    aroundCellsArray[randomIndex][0],
+    aroundCellsArray[randomIndex][1],
+  ];
+
+  cells.forEach((cell) => {
+    const conditionCoordinates =
+      cell.dataset.x == randomAroundCellX &&
+      cell.dataset.y == randomAroundCellY;
+    if (
+      conditionCoordinates &&
+      board[randomAroundCellY][randomAroundCellX] !== 0
+    ) {
+      getWoundedDeck(cell);
+
+      if (board[randomAroundCellY][randomAroundCellX] == 2) {
+        getRandomShot(board, cells);
+      } else if (board[randomAroundCellY][randomAroundCellX] == 3) {
+        checkThirdCell(
+          woundedY,
+          woundedX,
+          randomAroundCellY,
+          randomAroundCellX,
+          cells,
+          board
+        );
+      } else if (board[randomAroundCellY][randomAroundCellX] == 4) {
+        checkThirdCell(
+          woundedY,
+          woundedX,
+          randomAroundCellY,
+          randomAroundCellX,
+          cells,
+          board
+        );
+      }
+    } else if (
+      conditionCoordinates &&
+      board[randomAroundCellY][randomAroundCellX] == 0
+    ) {
+      getMissCell(cell);
+
+      shotFlag = true;
+    }
+  });
+}
+
+function checkThirdCell(
+  firstWoundedDeckY,
+  firstWoundedDeckX,
+  secondWoundedDeckY,
+  secondWoundedDeckX,
+  cells,
+  board
+) {
+  let filteredArrayCells = [];
+  let resultFilteredArrayCells = [];
+
+  if (firstWoundedDeckY == secondWoundedDeckY) {
+    if (firstWoundedDeckX < secondWoundedDeckX) {
+      if (firstWoundedDeckX - 1 < 0) {
+        filteredArrayCells = [[firstWoundedDeckY, firstWoundedDeckX + 2]];
+      } else if (firstWoundedDeckX + 2 > 9) {
+        filteredArrayCells = [[firstWoundedDeckY, firstWoundedDeckX - 1]];
+      } else {
+        filteredArrayCells = [
+          [firstWoundedDeckY, firstWoundedDeckX - 1],
+          [firstWoundedDeckY, firstWoundedDeckX + 2],
+        ];
+      }
+    } else if (firstWoundedDeckX > secondWoundedDeckX) {
+      if (secondWoundedDeckX - 1 < 0) {
+        filteredArrayCells = [[secondWoundedDeckY, secondWoundedDeckX + 2]];
+      } else if (secondWoundedDeckX + 2 > 9) {
+        filteredArrayCells = [[secondWoundedDeckY, secondWoundedDeckX - 1]];
+      } else {
+        filteredArrayCells = [
+          [secondWoundedDeckY, secondWoundedDeckX - 1],
+          [secondWoundedDeckY, secondWoundedDeckX + 2],
+        ];
+      }
+    }
+  } else if (firstWoundedDeckX == secondWoundedDeckX) {
+    if (firstWoundedDeckY < secondWoundedDeckY) {
+      if (firstWoundedDeckY - 1 < 0) {
+        filteredArrayCells = [[firstWoundedDeckY + 2, firstWoundedDeckX]];
+      } else if (firstWoundedDeckY + 2 > 9) {
+        filteredArrayCells = [[firstWoundedDeckY - 1, firstWoundedDeckX]];
+      } else {
+        filteredArrayCells = [
+          [firstWoundedDeckY - 1, firstWoundedDeckX],
+          [firstWoundedDeckY + 2, firstWoundedDeckX],
+        ];
+      }
+    } else if (firstWoundedDeckY > secondWoundedDeckY) {
+      if (secondWoundedDeckY - 1 < 0) {
+        filteredArrayCells = [[secondWoundedDeckY + 2, secondWoundedDeckX]];
+      } else if (secondWoundedDeckY + 2 > 9) {
+        filteredArrayCells = [[secondWoundedDeckY - 1, secondWoundedDeckX]];
+      } else {
+        filteredArrayCells = [
+          [secondWoundedDeckY - 1, secondWoundedDeckX],
+          [secondWoundedDeckY + 2, secondWoundedDeckX],
+        ];
+      }
     }
   }
 
-  console.log(adjacentCells);
-  console.log(resultAdjacentCells);
+  cells.forEach((cell) => {
+    for (let i = 0; i < filteredArrayCells.length; i++) {
+      if (
+        cell.dataset.x == filteredArrayCells[i][1] &&
+        cell.dataset.y == filteredArrayCells[i][0] &&
+        cell.dataset.flag == "on"
+      ) {
+        resultFilteredArrayCells.push(filteredArrayCells[i]);
+      }
+    }
+  });
 
-  randomCell = Math.floor(Math.random() * resultAdjacentCells.length);
+  if (filteredArrayCells.length == 1) {
+    getThirdShot(
+      filteredArrayCells,
+      cells,
+      board,
+      firstWoundedDeckY,
+      firstWoundedDeckX
+    );
+  } else {
+    getThirdShot(
+      resultFilteredArrayCells,
+      cells,
+      board,
+      firstWoundedDeckY,
+      firstWoundedDeckX
+    );
+  }
+}
 
-  secondShotCoordinateX = resultAdjacentCells[randomCell][1];
-  secondShotCoordinateY = resultAdjacentCells[randomCell][0];
-
-  console.log([secondShotCoordinateY, secondShotCoordinateX]);
+function getThirdShot(
+  arrayCells,
+  cells,
+  board,
+  firstWoundedDeckY,
+  firstWoundedDeckX
+) {
+  if (
+    arrayCells.length == 1 &&
+    board[firstWoundedDeckY][firstWoundedDeckX] == 3
+  ) {
+    cells.forEach((cell) => {
+      if (
+        cell.dataset.x == arrayCells[0][1] &&
+        cell.dataset.y == arrayCells[0][0]
+      ) {
+        getWoundedDeck(cell);
+        getRandomShot(board, cells);
+      }
+    });
+  } else if (
+    arrayCells.length == 2 &&
+    board[firstWoundedDeckY][firstWoundedDeckX] == 3
+  ) {
+    checkNextShot(arrayCells, cells, board);
+  }
 
   if (
-    boardFriendly[secondShotCoordinateY][secondShotCoordinateX] !== 0 &&
-    resultAdjacentCells.length !== 1
+    arrayCells.length == 1 &&
+    board[firstWoundedDeckY][firstWoundedDeckX] == 4
   ) {
-    enemyBoard.style.zIndex = -10;
-
-    console.log("2 svobodnie");
-
-    cellsFriendly.forEach((cell) => {
+    cells.forEach((cell) => {
       if (
-        cell.dataset.x == secondShotCoordinateX &&
-        cell.dataset.y == secondShotCoordinateY
+        cell.dataset.x == arrayCells[0][1] &&
+        cell.dataset.y == arrayCells[0][0]
       ) {
-        setTimeout(() => {
-          cell.style.backgroundColor = "red";
-          enemyBoard.style.zIndex = 0;
-          cell.dataset.flag = "off";
-          cell.dataset.isWounded = "yes";
-        }, 1000);
+        getWoundedDeck(cell);
       }
-
-      if (
-        boardFriendly[secondShotCoordinateY][secondShotCoordinateX + 1] !== 0 &&
-        cell.dataset.x == secondShotCoordinateX + 1 &&
-        cell.dataset.y == secondShotCoordinateY
-      ) {
-        hitShot = false;
-        setTimeout(() => {
-          cell.style.backgroundColor = "red";
-          enemyBoard.style.zIndex = 0;
-          cell.dataset.flag = "off";
-          cell.dataset.isWounded = "yes";
-          shotCell(boardFriendly, cellsFriendly);
-        }, 1500);
-      } else if (
-        boardFriendly[secondShotCoordinateY][secondShotCoordinateX + 1] == 0 &&
-        cell.dataset.x == secondShotCoordinateX + 1 &&
-        cell.dataset.y == secondShotCoordinateY
-      ) {
-        setTimeout(() => {
-          cell.style.backgroundColor = "yellow";
-          enemyBoard.style.zIndex = 0;
-          cell.dataset.flag = "off";
-          cell.dataset.isWounded = "yes";
-        }, 1500);
+      if (firstWoundedDeckY == arrayCells[0][0]) {
+        if (
+          cell.dataset.y == arrayCells[0][0] &&
+          cell.dataset.x == arrayCells[0][1] + 1 &&
+          cell.dataset.flag !== "off"
+        ) {
+          getWoundedDeck(cell);
+          getRandomShot(board, cells);
+        } else if (
+          cell.dataset.y == arrayCells[0][0] &&
+          cell.dataset.x == arrayCells[0][1] - 1 &&
+          cell.dataset.flag !== "off"
+        ) {
+          getWoundedDeck(cell);
+          getRandomShot(board, cells);
+        }
+      } else if (firstWoundedDeckX == arrayCells[0][1]) {
+        if (
+          cell.dataset.y == arrayCells[0][0] + 1 &&
+          cell.dataset.x == arrayCells[0][1] &&
+          cell.dataset.flag !== "off"
+        ) {
+          getWoundedDeck(cell);
+          getRandomShot(board, cells);
+        } else if (
+          cell.dataset.y == arrayCells[0][0] - 1 &&
+          cell.dataset.x == arrayCells[0][1] &&
+          cell.dataset.flag !== "off"
+        ) {
+          getWoundedDeck(cell);
+          getRandomShot(board, cells);
+        }
       }
-
-      if (
-        boardFriendly[resultAdjacentCells[0][0]][resultAdjacentCells[0][1]] == 0
-      ) {
-        secondShotCoordinateX = resultAdjacentCells[1][1];
-        secondShotCoordinateY = resultAdjacentCells[1][0];
-        secondShot = true;
-      } else {
-        secondShotCoordinateX = resultAdjacentCells[0][1];
-        secondShotCoordinateY = resultAdjacentCells[0][0];
-        secondShot = true;
-      }
-
-      // В следубщем ходе покрасить и вызвать функцию с рандомным сх су
     });
-
-    // то берем из  adjacentCells другое число и красим его
-
-    // if (
-    //   boardFriendly[currentY][currentX] == 4 &&
-    //   boardFriendly[prevY][prevX] == 4
-    // ) {
-    //   hitShot = false;
-    //   secondShot = false;
-
-    //   setTimeout(() => {
-    //     enemyBoard.style.zIndex = 0;
-    //     cellsFriendly.forEach((cell) => {
-    //       if (
-    //         cell.dataset.x == secondShotCoordinateX &&
-    //         cell.dataset.y == secondShotCoordinateY
-    //       ) {
-    //         cell.style.backgroundColor = "red";
-
-    //         cell.dataset.flag = "off";
-    //       }
-    //     });
-    //     // showFreeCellsHorisontalShip(
-    //     //   currentY,
-    //     //   currentX,
-    //     //   prevY,
-    //     //   prevX,
-    //     //   cellsFriendly
-    //     // );
-    //     shotCell(boardFriendly, cellsFriendly);
-    //   }, 1500);
-    // }
-  } else {
-    secondShot = true;
-
-    setTimeout(() => {
-      enemyBoard.style.zIndex = 0;
-
-      if (
-        boardFriendly[resultAdjacentCells[0][0]][resultAdjacentCells[0][1]] == 0
-      ) {
-        secondShotCoordinateX = resultAdjacentCells[1][1];
-        secondShotCoordinateY = resultAdjacentCells[1][0];
-      } else {
-        secondShotCoordinateX = resultAdjacentCells[0][1];
-        secondShotCoordinateY = resultAdjacentCells[0][0];
-      }
-    }, 1000);
+  } else if (
+    arrayCells.length == 2 &&
+    board[firstWoundedDeckY][firstWoundedDeckX] == 4
+  ) {
+    checkNextShot(arrayCells, cells, board);
   }
+}
+
+function checkNextShot(arrayCells, cells, board) {
+  const randomIndex = Math.floor(Math.random() * arrayCells.length);
+  let checkedCellAfterThirdShotArray = [];
+
+  if (
+    arrayCells[0][0] == arrayCells[randomIndex][0] &&
+    arrayCells[0][1] == arrayCells[randomIndex][1]
+  ) {
+    checkedCellAfterThirdShotArray[0] = [arrayCells[1][0], arrayCells[1][1]];
+  } else if (
+    arrayCells[1][0] == arrayCells[randomIndex][0] &&
+    arrayCells[1][1] == arrayCells[randomIndex][1]
+  ) {
+    checkedCellAfterThirdShotArray[0] = [arrayCells[0][0], arrayCells[0][1]];
+  }
+
+  cells.forEach((cell) => {
+    if (
+      arrayCells[randomIndex][0] == cell.dataset.y &&
+      arrayCells[randomIndex][1] == cell.dataset.x &&
+      board[arrayCells[randomIndex][0]][arrayCells[randomIndex][1]] == 3
+    ) {
+      getWoundedDeck(cell);
+      getRandomShot(board, cells);
+    } else if (
+      arrayCells[randomIndex][0] == cell.dataset.y &&
+      arrayCells[randomIndex][1] == cell.dataset.x &&
+      board[arrayCells[randomIndex][0]][arrayCells[randomIndex][1]] == 0
+    ) {
+      getMissCell(cell);
+
+      for (let i = 0; i < arrayCells.length; i++) {
+        if (arrayCells[i] !== arrayCells[randomIndex]) {
+          thirdWoundedDeckArray = arrayCells[i];
+          thirdWoundedDeckFlag = true;
+        }
+      }
+    } else if (
+      arrayCells[randomIndex][0] == cell.dataset.y &&
+      arrayCells[randomIndex][1] == cell.dataset.x &&
+      board[arrayCells[randomIndex][0]][arrayCells[randomIndex][1]] == 4
+    ) {
+      getWoundedDeck(cell);
+      getLastWoundedDeck(
+        arrayCells[randomIndex][0],
+        arrayCells[randomIndex][1],
+        checkedCellAfterThirdShotArray,
+        cells,
+        board
+      );
+    }
+  });
+}
+
+function getThirdWoundedDeck(
+  thirdWoundedDeckArray,
+  cells,
+  board,
+  firstWoundedDeckY,
+  firstWoundedDeckX
+) {
+  thirdWoundedDeckFlag = false;
+
+  cells.forEach((cell) => {
+    if (
+      cell.dataset.x == thirdWoundedDeckArray[1] &&
+      cell.dataset.y == thirdWoundedDeckArray[0] &&
+      board[thirdWoundedDeckArray[0]][thirdWoundedDeckArray[1]] == 3
+    ) {
+      getWoundedDeck(cell);
+      getRandomShot(board, cells);
+    } else if (
+      cell.dataset.x == thirdWoundedDeckArray[1] &&
+      cell.dataset.y == thirdWoundedDeckArray[0] &&
+      board[thirdWoundedDeckArray[0]][thirdWoundedDeckArray[1]] == 4
+    ) {
+      getWoundedDeck(cell);
+      getFourthDeckAfterMiss(
+        thirdWoundedDeckArray,
+        cells,
+        board,
+        firstWoundedDeckY,
+        firstWoundedDeckX
+      );
+    }
+  });
+}
+
+function getFourthDeckAfterMiss(
+  thirdWoundedDeckArray,
+  cells,
+  board,
+  firstWoundedDeckY,
+  firstWoundedDeckX
+) {
+  if (firstWoundedDeckY == thirdWoundedDeckArray[0]) {
+    cells.forEach((cell) => {
+      if (
+        cell.dataset.y == thirdWoundedDeckArray[0] &&
+        cell.dataset.x == thirdWoundedDeckArray[1] + 1 &&
+        cell.dataset.flag == "on"
+      ) {
+        getWoundedDeck(cell);
+        getRandomShot(board, cells);
+      } else if (
+        cell.dataset.y == thirdWoundedDeckArray[0] &&
+        cell.dataset.x == thirdWoundedDeckArray[1] - 1 &&
+        cell.dataset.flag == "on"
+      ) {
+        getWoundedDeck(cell);
+        getRandomShot(board, cells);
+      }
+    });
+  } else if (firstWoundedDeckX == thirdWoundedDeckArray[1]) {
+    cells.forEach((cell) => {
+      if (
+        cell.dataset.y == thirdWoundedDeckArray[0] + 1 &&
+        cell.dataset.x == thirdWoundedDeckArray[1] &&
+        cell.dataset.flag == "on"
+      ) {
+        getWoundedDeck(cell);
+        getRandomShot(board, cells);
+      } else if (
+        cell.dataset.y == thirdWoundedDeckArray[0] - 1 &&
+        cell.dataset.x == thirdWoundedDeckArray[1] &&
+        cell.dataset.flag == "on"
+      ) {
+        getWoundedDeck(cell);
+        getRandomShot(board, cells);
+      }
+    });
+  }
+}
+
+function getLastWoundedDeck(
+  currentY,
+  currentX,
+  checkedCellAfterThirdShotArray,
+  cells,
+  board
+) {
+  let cellsForCheck = [];
+
+  cellsForCheck[0] = [
+    checkedCellAfterThirdShotArray[0][0],
+    checkedCellAfterThirdShotArray[0][1],
+  ];
+
+  if (currentY == checkedCellAfterThirdShotArray[0][0]) {
+    cells.forEach((cell) => {
+      if (
+        cell.dataset.y == currentY &&
+        cell.dataset.x == currentX + 1 &&
+        cell.dataset.flag == "on"
+      ) {
+        cellsForCheck[1] = [currentY, currentX + 1];
+      } else if (
+        cell.dataset.y == currentY &&
+        cell.dataset.x == currentX - 1 &&
+        cell.dataset.flag == "on"
+      ) {
+        cellsForCheck[1] = [currentY, currentX - 1];
+      }
+    });
+    getLastShot(cellsForCheck, cells, board);
+  } else if (currentX == checkedCellAfterThirdShotArray[0][1]) {
+    cells.forEach((cell) => {
+      if (
+        cell.dataset.y == currentY + 1 &&
+        cell.dataset.x == currentX &&
+        cell.dataset.flag == "on"
+      ) {
+        cellsForCheck[1] = [currentY + 1, currentX];
+      } else if (
+        cell.dataset.y == currentY - 1 &&
+        cell.dataset.x == currentX &&
+        cell.dataset.flag == "on"
+      ) {
+        cellsForCheck[1] = [currentY - 1, currentX];
+      }
+    });
+    getLastShot(cellsForCheck, cells, board);
+  }
+}
+
+function getLastShot(arrayCells, cells, board) {
+  const randomIndex = Math.floor(Math.random() * arrayCells.length);
+
+  if (arrayCells.length == 2) {
+    if (
+      arrayCells[0][0] == arrayCells[randomIndex][0] &&
+      arrayCells[0][1] == arrayCells[randomIndex][1]
+    ) {
+      fourthWoundedDeckArray = [arrayCells[1][0], arrayCells[1][1]];
+    } else if (
+      arrayCells[1][0] == arrayCells[randomIndex][0] &&
+      arrayCells[1][1] == arrayCells[randomIndex][1]
+    ) {
+      fourthWoundedDeckArray = [arrayCells[0][0], arrayCells[0][1]];
+    }
+  }
+  cells.forEach((cell) => {
+    if (
+      arrayCells[randomIndex][0] == cell.dataset.y &&
+      arrayCells[randomIndex][1] == cell.dataset.x &&
+      board[arrayCells[randomIndex][0]][arrayCells[randomIndex][1]] == 0
+    ) {
+      getMissCell(cell);
+      fourthWoundedDeckFlag = true;
+    } else if (
+      arrayCells[randomIndex][0] == cell.dataset.y &&
+      arrayCells[randomIndex][1] == cell.dataset.x &&
+      board[arrayCells[randomIndex][0]][arrayCells[randomIndex][1]] == 4
+    ) {
+      getWoundedDeck(cell);
+      getRandomShot(board, cells);
+    }
+  });
+}
+
+function lastShot(lastCellArray, cells, board) {
+  fourthWoundedDeckFlag = false;
+
+  cells.forEach((cell) => {
+    if (
+      cell.dataset.y == lastCellArray[0] &&
+      cell.dataset.x == lastCellArray[1]
+    ) {
+      getWoundedDeck(cell);
+      getRandomShot(board, cells);
+    }
+  });
 }
 
 // Конец: стрельба ИИ
